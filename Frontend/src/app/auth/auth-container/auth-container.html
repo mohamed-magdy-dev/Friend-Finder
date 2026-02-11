@@ -1,0 +1,45 @@
+<div class="glass-container">
+  
+  <div class="switch-buttons">
+    <button [class.active]="!isSignUpActive" (click)="isSignUpActive = false">Login</button>
+    <button [class.active]="isSignUpActive" (click)="isSignUpActive = true">Sign Up</button>
+  </div>
+
+  <div *ngIf="!isSignUpActive" class="form-content animate-mode">
+    <h2>Welcome Back!</h2>
+    <p>We missed you! Login to continue.</p>
+    
+    <form (ngSubmit)="onLogin()">
+      <div class="input-group">
+        <input type="email" placeholder="Email Address" [(ngModel)]="loginData.email" name="email" required>
+      </div>
+      <div class="input-group">
+        <input type="password" placeholder="Password" [(ngModel)]="loginData.password" name="password" required>
+      </div>
+      
+      <button type="submit" class="submit-btn">Login</button>
+      <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+    </form>
+  </div>
+
+  <div *ngIf="isSignUpActive" class="form-content animate-mode">
+    <h2>Create Account</h2>
+    <p>Join our community and find friends.</p>
+    
+    <form (ngSubmit)="onRegister()">
+      <div class="input-group">
+        <input type="text" placeholder="Full Name" [(ngModel)]="registerData.fullName" name="fullName" required>
+      </div>
+      <div class="input-group">
+        <input type="email" placeholder="Email Address" [(ngModel)]="registerData.email" name="remail" required>
+      </div>
+      <div class="input-group">
+        <input type="password" placeholder="Password" [(ngModel)]="registerData.password" name="rpassword" required>
+      </div>
+      
+      <button type="submit" class="submit-btn">Sign Up</button>
+      <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+    </form>
+  </div>
+
+</div>

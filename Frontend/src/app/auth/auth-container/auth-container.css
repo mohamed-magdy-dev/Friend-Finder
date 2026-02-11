@@ -1,0 +1,151 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+
+/* 🛠️ الحل السحري لتنظيم المقاسات */
+* {
+    box-sizing: border-box; /* ده بيمنع الخانات انها تخرج بره حدودها */
+    margin: 0;
+    padding: 0;
+}
+
+:host {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    font-family: 'Poppins', sans-serif;
+}
+
+/* الصندوق الزجاجي */
+.glass-container {
+    background: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    
+    width: 420px; /* عرض مثالي مش عريض أوي ولا رفيع */
+    padding: 40px;
+    text-align: center;
+    color: white;
+    position: relative;
+    overflow: hidden; /* مهم عشان الانيميشن */
+}
+
+/* أزرار التبديل */
+.switch-buttons {
+    margin-bottom: 25px;
+    background: rgba(0,0,0,0.2);
+    border-radius: 30px;
+    display: inline-flex;
+    padding: 5px;
+    position: relative;
+    z-index: 10;
+}
+
+.switch-buttons button {
+    background: transparent;
+    border: none;
+    color: rgba(255,255,255,0.7);
+    padding: 8px 25px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.switch-buttons button.active {
+    background: white;
+    color: #764ba2;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    transform: scale(1.05); /* تكبير بسيط للزرار النشط */
+}
+
+/* العناوين */
+h2 {
+    font-size: 26px;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+p {
+    font-size: 14px;
+    opacity: 0.8;
+    margin-bottom: 25px;
+}
+
+/* 🛠️ تظبيط الخانات (عشان متبقاش طويلة زيادة) */
+.input-group {
+    margin-bottom: 15px;
+    width: 100%; /* تتأكد انها واخدة العرض المتاح بس */
+}
+
+input {
+    width: 100%; /* بفضل الـ box-sizing فوق، الـ 100% مش هتخرج بره */
+    padding: 15px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.3);
+    background: rgba(255,255,255,0.9);
+    font-size: 14px;
+    color: #333;
+    outline: none;
+    transition: 0.3s;
+}
+
+input:focus {
+    background: white;
+    border-color: #667eea;
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2); /* لمعة زرقاء خفيفة */
+}
+
+/* زرار الإرسال */
+.submit-btn {
+    width: 100%;
+    padding: 15px;
+    margin-top: 10px;
+    background: linear-gradient(to right, #667eea, #764ba2);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.submit-btn:active {
+    transform: translateY(0);
+}
+
+.error {
+    color: #ffcccc;
+    background: rgba(255,0,0,0.2);
+    padding: 10px;
+    border-radius: 8px;
+    margin-top: 15px;
+    font-size: 13px;
+    border: 1px solid rgba(255,0,0,0.1);
+}
+
+/* ✨ الأنيميشن الناعم (Smooth Transition) */
+.animate-mode {
+    animation: smoothFadeUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes smoothFadeUp {
+    0% {
+        opacity: 0;
+        transform: translateY(20px) scale(0.98); /* بيبدأ من تحت شوية وشفاف */
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1); /* بيثبت في مكانه */
+    }
+}
