@@ -35,7 +35,23 @@ export class AuthContainerComponent {
       // التوجيه للصفحة الرئيسية
       this.router.navigate(['/home']);
       },
-      error: () => this.errorMessage = 'إيميل أو باسورد غلط!'
+      error: (err: any) => {
+  console.error('Registration Error:', err);
+  // لو الباك إند باعت لنا إيرور من الـ Validation أو الـ Exception Handler
+  if (err.error && typeof err.error === 'object') {
+    if (err.error.error) {
+      // دي عشان لو رسالة RuntimeException (زي الإيميل مكرر)
+      this.errorMessage = err.error.error;
+    } else {
+      // دي عشان أخطاء الـ Validation (زي الباسورد ضعيف)
+      // هنجيب أول خطأ في القائمة ونعرضه
+      this.errorMessage = Object.values(err.error)[0] as string;
+    }
+  } else {
+    this.errorMessage = 'An unexpected server error occurred!';
+  }
+}
+   
     });
   }
 
@@ -43,11 +59,19 @@ export class AuthContainerComponent {
   onRegister() {
     this.authService.register(this.registerData).subscribe({
       next: () => {
-        alert('تم التسجيل! سجل دخولك بقى.');
+        alert('Registered! Now log in.');
         // بعد التسجيل الناجح، نرجع أوتوماتيك لشاشة اللوجن
         this.isSignUpActive = false;
       },
-      error: () => this.errorMessage = 'الإيميل ده مستخدم قبل كده!'
+      error: (err: any) => {
+  console.error('Login Error:', err);
+  if (err.error && err.error.error) {
+    // هيعرض رسالة "كلمة المرور خطأ" أو "بيانات الدخول غير صحيحة" اللي جاية من الباك إند
+    this.errorMessage = err.error.error; 
+  } else {
+    this.errorMessage = 'Make sure the entered data is correct. ';
+  }
+}
     });
   }
 }

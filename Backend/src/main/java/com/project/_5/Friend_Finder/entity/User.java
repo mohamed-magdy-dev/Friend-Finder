@@ -7,7 +7,7 @@ import lombok.AllArgsConstructor;
 
 @Entity
 @Table(name = "APP_USERS") //Oracle has USER .. so i had to change it.
-@Data // trickaya better than @Getter & @Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class User {

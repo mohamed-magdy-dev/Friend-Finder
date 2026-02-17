@@ -27,7 +27,9 @@ public class AuthService {
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new RuntimeException("Email already exists");
         }
-
+        if (userRepository.findByFullName(request.getFullName()).isPresent()) {
+            throw new RuntimeException("this name already exists! please try a different name");
+        }
         // prepare user and hashing passwords
         User user = new User();
         user.setFullName(request.getFullName());
@@ -35,6 +37,12 @@ public class AuthService {
         user.setPassword(passwordEncoder.encode(request.getPassword())); // hashing .. and it is importantً
         user.setRole("USER");
 
+
+        if (userRepository.count() == 0) {
+            user.setRole("ADMIN");
+        } else {
+            user.setRole("USER");
+        }
         // save in DB
         userRepository.save(user);
 
@@ -45,14 +53,20 @@ public class AuthService {
 
     // login method
     public AuthResponse login(LoginRequest request) {
-        //  security manager is the one checking from email/pass
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
-        );
+        // request.getEmail() هنا ممكن يكون إيميل أو اسم يوزر، مش هتفرق الاسم إيه
+        String input = request.getEmail();
 
-        // if pass the authentication or class above then generate token.
-        var user = userRepository.findByEmail(request.getEmail()).orElseThrow();
-        String token = jwtUtils.generateToken(user.getEmail());
+        //  دور في الداتا بيز (إيميل أو اسم)
+        User user = userRepository.findByEmailOrFullName(input)
+                .orElseThrow(() -> new RuntimeException("login information are incorrect"));
+
+        //  اتأكد من الباسورد يدوياً (لأن لفيت لفة كده)
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw new RuntimeException("Password Incorrect");
+        }
+
+        // 3. لو تمام، طلع التوكن
+        String token = jwtUtils.generateToken(user.getEmail()); // التوكن لسه شايل الإيميل كـ Unique ID
         return new AuthResponse(token, user.getFullName());
     }
 }
