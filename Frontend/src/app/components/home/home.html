@@ -1,19 +1,97 @@
-<div class="main-container">
-  
-  <nav class="navbar">
-    <div class="logo">Friend Finder 🌍</div>
-    
-    <div class="user-info">
-      <span class="welcome-text">Welcome, <strong>{{ userName }}</strong></span>
-      <button (click)="logout()" class="logout-btn">Logout</button>
+<div class="main-wrapper">
+
+  <!-- NAVBAR -->
+  <nav class="navbar navbar-expand-lg custom-navbar px-4">
+    <div class="container-fluid">
+      <span class="navbar-brand logo-text">Friend Finder</span>
+
+      <div class="d-flex align-items-center gap-3">
+        <span class="welcome-text">
+          Welcome, <strong>{{ userName }}</strong>
+        </span>
+        <button class="btn btn-sm btn-outline-light" (click)="logout()">
+          Logout
+        </button>
+      </div>
     </div>
   </nav>
 
-  <div class="content-area">
-    <div class="welcome-card">
-      <h1>Ready to connect? 🚀</h1>
-      <p>Start searching for friends or check who joined recently.</p>
-      <button class="explore-btn">Find Friends</button>
+  <!-- MAIN CONTENT -->
+  <div class="container-fluid mt-4">
+    <div class="row justify-content-center">
+
+      <!-- LEFT SIDE -->
+      <div class="col-lg-2 d-none d-lg-block">
+        <div class="sidebar-card p-3">
+          <h6>Menu</h6>
+          <p class="small text-muted">Home</p>
+          <p class="small text-muted">Friends</p>
+          <p class="small text-muted">Profile</p>
+        </div>
+      </div>
+
+      <!-- CENTER FEED -->
+      <div class="col-lg-5 col-md-8">
+        
+        <!-- Loading Message -->
+        @if (users.length === 0 && !errorMessage) {
+          <div class="card post-card text-center p-4">
+            <h5>Finding Friends...</h5>
+            <p class="text-muted small">Searching for users</p>
+          </div>
+        }
+
+        <!-- USERS FEED -->
+        @for (user of users; track user.id) {
+          <div class="card post-card mb-4 p-3">
+
+            <div class="d-flex align-items-center mb-3">
+              <div class="avatar-circle me-3">
+                {{ user.fullName.charAt(0).toUpperCase() }}
+              </div>
+              <div>
+                <h6 class="mb-0">{{ user.fullName }}</h6>
+                <small class="text-muted">{{ user.email }}</small>
+              </div>
+            </div>
+
+            <p class="post-text">
+              Looking to connect and make new friends 👋
+            </p>
+
+            <div class="d-flex justify-content-between mt-3">
+              <button class="btn btn-sm btn-light action-btn">
+                👍 Like
+              </button>
+              <button class="btn btn-sm btn-light action-btn">
+                💬 Comment
+              </button>
+              <button class="btn btn-sm btn-light action-btn">
+                ➕ Add Friend
+              </button>
+            </div>
+
+          </div>
+        }
+
+        @if (errorMessage) {
+          <div class="alert alert-danger text-center">
+            {{ errorMessage }}
+          </div>
+        }
+
+      </div>
+
+      <!-- RIGHT SIDE -->
+      <div class="col-lg-2 d-none d-lg-block">
+        <div class="sidebar-card p-3">
+          <h6>About</h6>
+          <p class="small text-muted">
+            Connect with people nearby and grow your circle.
+          </p>
+        </div>
+      </div>
+
     </div>
   </div>
 

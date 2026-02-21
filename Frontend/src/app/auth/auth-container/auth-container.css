@@ -1,8 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
 
-/* 🛠️ الحل السحري لتنظيم المقاسات */
+/* 🛠️ Fix sizing globally */
 * {
-    box-sizing: border-box; /* ده بيمنع الخانات انها تخرج بره حدودها */
+    box-sizing: border-box;
     margin: 0;
     padding: 0;
 }
@@ -16,7 +16,7 @@
     font-family: 'Poppins', sans-serif;
 }
 
-/* الصندوق الزجاجي */
+/* Glass container */
 .glass-container {
     background: rgba(255, 255, 255, 0.2);
     box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
@@ -24,16 +24,16 @@
     -webkit-backdrop-filter: blur(12px);
     border-radius: 20px;
     border: 1px solid rgba(255, 255, 255, 0.18);
-    
-    width: 420px; /* عرض مثالي مش عريض أوي ولا رفيع */
+
+    width: 420px;
     padding: 40px;
     text-align: center;
     color: white;
     position: relative;
-    overflow: hidden; /* مهم عشان الانيميشن */
+    overflow: hidden;
 }
 
-/* أزرار التبديل */
+/* Switch buttons */
 .switch-buttons {
     margin-bottom: 25px;
     background: rgba(0,0,0,0.2);
@@ -60,10 +60,10 @@
     background: white;
     color: #764ba2;
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    transform: scale(1.05); /* تكبير بسيط للزرار النشط */
+    transform: scale(1.05);
 }
 
-/* العناوين */
+/* Headings */
 h2 {
     font-size: 26px;
     font-weight: 600;
@@ -76,14 +76,14 @@ p {
     margin-bottom: 25px;
 }
 
-/* 🛠️ تظبيط الخانات (عشان متبقاش طويلة زيادة) */
+/* Input fields */
 .input-group {
     margin-bottom: 15px;
-    width: 100%; /* تتأكد انها واخدة العرض المتاح بس */
+    width: 100%;
 }
 
 input {
-    width: 100%; /* بفضل الـ box-sizing فوق، الـ 100% مش هتخرج بره */
+    width: 100%;
     padding: 15px;
     border-radius: 10px;
     border: 1px solid rgba(255,255,255,0.3);
@@ -97,10 +97,10 @@ input {
 input:focus {
     background: white;
     border-color: #667eea;
-    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2); /* لمعة زرقاء خفيفة */
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2);
 }
 
-/* زرار الإرسال */
+/* Submit button */
 .submit-btn {
     width: 100%;
     padding: 15px;
@@ -124,17 +124,47 @@ input:focus {
     transform: translateY(0);
 }
 
-.error {
-    color: #ffcccc;
-    background: rgba(255,0,0,0.2);
-    padding: 10px;
+/* ============================= */
+/* ✅ NEW PROMPT MESSAGE STYLES */
+/* ============================= */
+
+.prompt-msg {
+    padding: 12px;
     border-radius: 8px;
     margin-top: 15px;
     font-size: 13px;
-    border: 1px solid rgba(255,0,0,0.1);
+    font-weight: 500;
+    text-align: center;
+    animation: fadeIn 0.3s ease-in-out;
 }
 
-/* ✨ الأنيميشن الناعم (Smooth Transition) */
+/* Success message */
+.success-msg {
+    color: #155724;
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+}
+
+/* Error message */
+.error-msg {
+    color: #721c24;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+}
+
+/* Fade animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Smooth mode switch animation */
 .animate-mode {
     animation: smoothFadeUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
@@ -142,10 +172,10 @@ input:focus {
 @keyframes smoothFadeUp {
     0% {
         opacity: 0;
-        transform: translateY(20px) scale(0.98); /* بيبدأ من تحت شوية وشفاف */
+        transform: translateY(20px) scale(0.98);
     }
     100% {
         opacity: 1;
-        transform: translateY(0) scale(1); /* بيثبت في مكانه */
+        transform: translateY(0) scale(1);
     }
 }

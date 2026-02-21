@@ -1,61 +1,76 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+body {
+    background-color: #1e1f26;
+}
 
-.main-container {
-    font-family: 'Poppins', sans-serif;
+/* MAIN WRAPPER */
+.main-wrapper {
     min-height: 100vh;
-    background-color: #f0f2f5;
+    background: #1e1f26;
+    color: #e4e6eb;
 }
 
-.navbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 15px 50px;
-    background: white;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    position: sticky;
-    top: 0;
-    z-index: 1000;
+/* NAVBAR */
+.custom-navbar {
+    background: #2a2d35;
+    border-bottom: 1px solid #3a3d45;
 }
 
-.logo {
-    font-size: 24px;
-    font-weight: 700;
-    background: linear-gradient(to right, #667eea, #764ba2);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    cursor: pointer;
-}
-
-.user-info {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-}
-
-.logout-btn {
-    background: #ffe6e6;
-    color: #d63031;
-    border: none;
-    padding: 8px 20px;
-    border-radius: 20px;
+.logo-text {
     font-weight: 600;
-    cursor: pointer;
+    color: #f5f6fa;
+}
+
+.welcome-text {
+    color: #ccc;
+}
+
+/* SIDEBAR */
+.sidebar-card {
+    background: #2a2d35;
+    border-radius: 12px;
+    border: 1px solid #3a3d45;
+}
+
+/* POST CARD */
+.post-card {
+    background: #2a2d35;
+    border-radius: 15px;
+    border: 1px solid #3a3d45;
+    color: #e4e6eb;
     transition: 0.3s;
 }
 
-.logout-btn:hover { background: #d63031; color: white; }
-
-.content-area {
-    padding: 50px;
-    display: flex;
-    justify-content: center;
+.post-card:hover {
+    transform: translateY(-4px);
 }
 
-.welcome-card {
-    background: white;
-    padding: 40px 60px;
-    border-radius: 20px;
-    text-align: center;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+/* AVATAR */
+.avatar-circle {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #8e44ad, #6c5ce7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+}
+
+/* POST TEXT */
+.post-text {
+    font-size: 14px;
+    color: #ccc;
+}
+
+/* ACTION BUTTONS */
+.action-btn {
+    background: #3a3d45;
+    border: none;
+    color: #ccc;
+    transition: 0.3s;
+}
+
+.action-btn:hover {
+    background: #575b66;
+    color: white;
 }
