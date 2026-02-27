@@ -29,34 +29,37 @@
           <p class="small text-muted">Profile</p>
         </div>
       </div>
-
-      <!-- CENTER FEED -->
-      <div class="col-lg-5 col-md-8">
+<div class="col-lg-7 col-md-8">
         
-        <!-- Loading Message -->
-        @if (users.length === 0 && !errorMessage) {
+        @if (isLoading && !errorMessage) {
           <div class="card post-card text-center p-4">
-            <h5>Finding Friends...</h5>
-            <p class="text-muted small">Searching for users</p>
+            <h5>Loading Feed... 🔄</h5>
+            <p class="text-muted small">Fetching latest posts</p>
           </div>
         }
 
-        <!-- USERS FEED -->
-        @for (user of users; track user.id) {
+        @if (!isLoading && posts.length === 0 && !errorMessage) {
+          <div class="card post-card text-center p-4">
+            <h5>No posts yet! 📭</h5>
+            <p class="text-muted small">Be the first to share something with your friends.</p>
+          </div>
+        }
+
+        @for (post of posts; track post.id) {
           <div class="card post-card mb-4 p-3">
 
             <div class="d-flex align-items-center mb-3">
               <div class="avatar-circle me-3">
-                {{ user.fullName.charAt(0).toUpperCase() }}
+                {{ post.authorName.charAt(0).toUpperCase() }}
               </div>
               <div>
-                <h6 class="mb-0">{{ user.fullName }}</h6>
-                <small class="text-muted">{{ user.email }}</small>
+                <h6 class="mb-0">{{ post.authorName }}</h6>
+                <small class="text-muted">{{ post.createdAt | date:'medium' }}</small>
               </div>
             </div>
 
             <p class="post-text">
-              Looking to connect and make new friends 👋
+              {{ post.content }}
             </p>
 
             <div class="d-flex justify-content-between mt-3">
@@ -65,9 +68,6 @@
               </button>
               <button class="btn btn-sm btn-light action-btn">
                 💬 Comment
-              </button>
-              <button class="btn btn-sm btn-light action-btn">
-                ➕ Add Friend
               </button>
             </div>
 
@@ -81,7 +81,6 @@
         }
 
       </div>
-
       <!-- RIGHT SIDE -->
       <div class="col-lg-2 d-none d-lg-block">
         <div class="sidebar-card p-3">
