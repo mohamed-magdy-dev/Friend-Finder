@@ -1,9 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core'; 
 import { CommonModule } from '@angular/common'; 
 import { Router } from '@angular/router'; 
-// import { HttpClientModule } from '@angular/common/http';
-// import { UserService } from '../../service/user';
-import { PostService } from '../../service/post';
+import { PostService } from '../../service/post'; 
+
 @Component({
   selector: 'app-home', 
   standalone: true,     
@@ -14,13 +13,14 @@ import { PostService } from '../../service/post';
 export class Home implements OnInit { 
   
   userName: string = 'Friend'; 
-  posts: any[] = []; // 🌟 دي المصفوفة اللي هتشيل البوستات
-  isLoading: boolean = true; // عشان رسالة التحميل
+  posts: any[] = []; 
+  isLoading: boolean = true; 
   errorMessage: string = ''; 
 
   constructor(
     private router: Router,
-    private postService: PostService // 🌟 حقن السيرفس هنا
+    private postService: PostService,
+    private cdr: ChangeDetectorRef // 2. حقنّا الأداة هنا عشان نستخدمها
   ) {
     const storedName = localStorage.getItem('fullName');
     if (storedName) {
@@ -36,15 +36,20 @@ export class Home implements OnInit {
     this.isLoading = true;
     this.postService.getAllPosts(0, 10).subscribe({
       next: (res: any) => {
-        // 🌟 التريكة هنا: البوستات بتيجي من سبرينج جوه حاجة اسمها content
-        this.posts = res.content; 
-        this.isLoading = false;
-        console.log('Posts loaded:', this.posts);
+        this.posts = res.content ? res.content : (Array.isArray(res) ? res : []); 
+        this.isLoading = false; 
+        
+        // 3. السطر السحري: "يا أنجولار، أنا غيرت الداتا، حدث الـ HTML فوراً دلوقتي!"
+        this.cdr.detectChanges(); 
       },
       error: (err: any) => {
         console.error('Error fetching posts:', err);
-        this.errorMessage = 'Failed to load posts.';
+        this.errorMessage = 'Failed to load posts. Check console.';
         this.isLoading = false;
+        
+        // إجبار التحديث حتى لو في حالة الإيرور
+        this.cdr.detectChanges(); 
+
         if (err.status === 403) {
           this.logout();
         }
