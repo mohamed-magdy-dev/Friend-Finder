@@ -2,11 +2,12 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common'; 
 import { Router } from '@angular/router'; 
 import { PostService } from '../../service/post'; 
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-home', 
   standalone: true,     
-  imports: [CommonModule], 
+  imports: [CommonModule, FormsModule], 
   templateUrl: './home.html', 
   styleUrl: './home.css'     
 })
@@ -16,7 +17,8 @@ export class Home implements OnInit {
   posts: any[] = []; 
   isLoading: boolean = true; 
   errorMessage: string = ''; 
-
+  newPostContent: string = ''; 
+  isPosting: boolean = false;
   constructor(
     private router: Router,
     private postService: PostService,
@@ -31,6 +33,36 @@ export class Home implements OnInit {
   ngOnInit() {
     this.loadPosts();
   }
+
+
+createPost() {
+    // لو المربع فاضي، متعملش حاجة
+    if (!this.newPostContent.trim()) return; 
+
+    this.isPosting = true; // عشان نقفل الزرار واليوزر ميكررش الطلب
+
+    const request = {
+      content: this.newPostContent,
+      mediaType: 'TEXT' // مؤقتاً لحد ما نعمل رفع الصور
+    };
+
+    this.postService.createPost(request).subscribe({
+      next: (res: any) => {
+        // السطر ده سحري: بيحط البوست الجديد في "أول" المصفوفة عشان يظهر فوق خالص
+        this.posts.unshift(res); 
+        
+        this.newPostContent = ''; // بنفضي المربع تاني
+        this.isPosting = false;
+        
+        this.cdr.detectChanges(); // بنصحي الحارس عشان يحدّث الشاشة
+      },
+      error: (err: any) => {
+        console.error('Error creating post:', err);
+        this.isPosting = false;
+        this.cdr.detectChanges();
+      }
+    });}
+
 
   loadPosts() {
     this.isLoading = true;

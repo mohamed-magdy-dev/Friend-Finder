@@ -26,4 +26,8 @@ public class User {
     private String password;
 
     private String role;
+
+    private String bio;
+    private String profilePictureUrl;
+    private java.time.LocalDate birthDate;
 }

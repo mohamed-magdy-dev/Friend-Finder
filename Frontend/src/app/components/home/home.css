@@ -74,3 +74,31 @@ body {
     background: #575b66;
     color: white;
 }
+/* ... الكود القديم بتاعك زي ما هو ... */
+
+/* Custom Textarea for Dark Mode (ده اللي هنضيفه في الآخر) */
+.custom-input {
+    background-color: #1e1f26;
+    border: 1px solid #3a3d45;
+    color: #e4e6eb;
+    resize: none; /* دي بتمنع اليوزر إنه يشد المربع ويكبره ويبوظ شكل الصفحة */
+    border-radius: 10px;
+}
+
+.custom-input:focus {
+    background-color: #1e1f26;
+    color: #e4e6eb;
+    box-shadow: none; /* بنشيل الضل الأزرق بتاع البوتستراب الديفولت */
+    border-color: #6c5ce7; /* بنخلي لون الإطار بنفسجي لما اليوزر يدوس عليه عشان يكتب */
+}
+
+/* تعديل بسيط لزرار الـ Share عشان يليق مع الدارك مود */
+.btn-primary {
+    background-color: #6c5ce7;
+    border-color: #6c5ce7;
+}
+
+.btn-primary:hover, .btn-primary:focus {
+    background-color: #5a4bcf;
+    border-color: #5a4bcf;
+}

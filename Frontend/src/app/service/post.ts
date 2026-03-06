@@ -22,4 +22,13 @@ export class PostService {
     // بنبعت الطلب ومعاه رقم الصفحة في الـ URL
     return this.http.get<any>(`${this.apiUrl}?page=${page}&size=${size}`, { headers });
   }
+  createPost(postData: any): Observable<any> {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+
+    // بنبعت الطلب كـ POST للباك إند ومعاه الداتا (اللي هي النص)
+    return this.http.post<any>(this.apiUrl, postData, { headers });
+  }
 }
