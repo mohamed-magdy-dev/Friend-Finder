@@ -31,4 +31,13 @@ export class PostService {
     // بنبعت الطلب كـ POST للباك إند ومعاه الداتا (اللي هي النص)
     return this.http.post<any>(this.apiUrl, postData, { headers });
   }
+  toggleLike(postId: number): Observable<any> {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+
+    // لاحظ إننا ضفنا الـ postId في اللينك زي ما عملنا في سبرينج بوت
+    return this.http.post<any>(`${this.apiUrl}/${postId}/like`, {}, { headers });
+  }
 }

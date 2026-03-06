@@ -30,7 +30,8 @@ public class PostController {
     @GetMapping
     public ResponseEntity<Page<PostResponseDto>> getAllPosts(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        return ResponseEntity.ok(postService.getAllPosts(page, size));
-    }
+            @RequestParam(defaultValue = "10") int size,
+            Principal principal) {
+        String userEmail = principal.getName();
+        return ResponseEntity.ok(postService.getAllPosts(page, size, userEmail));    }
 }

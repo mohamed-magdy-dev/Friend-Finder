@@ -78,12 +78,11 @@
             </p>
 
             <div class="d-flex justify-content-between mt-3">
-              <button class="btn btn-sm btn-light action-btn">
-                👍 Like
-              </button>
-              <button class="btn btn-sm btn-light action-btn">
-                💬 Comment
-              </button>
+                <button class="btn btn-sm action-btn" 
+                        [ngClass]="post.isLiked ? 'btn-primary text-white' : 'btn-light'"
+                        (click)="toggleLike(post)">
+                  👍 {{ post.isLiked ? 'Liked' : 'Like' }} ({{ post.likeCount || 0 }})
+                </button>
             </div>
 
           </div>

@@ -63,6 +63,26 @@ createPost() {
       }
     });}
 
+    toggleLike(post: any) {
+    this.postService.toggleLike(post.id).subscribe({
+      next: (res: any) => {
+        // التريكة هنا: إحنا بنغير حالة البوست في الفرونت إند فوراً عشان اليوزر يحس بسرعة الموقع
+        if (res.message === 'Liked') {
+          post.isLiked = true; // بنعلم إنه معموله لايك
+          post.likeCount = (post.likeCount || 0) + 1;
+        } else if (res.message === 'Unliked') {
+          post.isLiked = false; // بنشيل العلامة
+          post.likeCount = Math.max(0, (post.likeCount || 1) - 1);
+        }
+        
+        // بنصحي الحارس عشان يغير لون الزرار في الـ HTML
+        this.cdr.detectChanges(); 
+      },
+      error: (err: any) => {
+        console.error('Error toggling like:', err);
+      }
+    });
+  }
 
   loadPosts() {
     this.isLoading = true;

@@ -4,6 +4,7 @@ import com.project._5.Friend_Finder.dto.PostRequestDto;
 import com.project._5.Friend_Finder.dto.PostResponseDto;
 import com.project._5.Friend_Finder.entity.Post;
 import com.project._5.Friend_Finder.entity.User;
+import com.project._5.Friend_Finder.repository.PostLikesRepository; // الريبو بتاعك
 import com.project._5.Friend_Finder.repository.PostRepository;
 import com.project._5.Friend_Finder.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,49 +19,56 @@ public class PostService {
 
     private final PostRepository postRepository;
     private final UserRepository userRepository;
+    private final PostLikesRepository postLikesRepository; // 🌟 حقنّا ريبو اللايكات هنا
 
-    // 1️⃣ دالة إنشاء بوست جديد
+    // create post
     public PostResponseDto createPost(PostRequestDto request, String userEmail) {
-        // 1. ندور على اليوزر اللي بيكتب البوست (بنجيبه بالإيميل من التوكن عشان الأمان)
         User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // 2. نجهز البوست الجديد عشان نحفظه
         Post post = new Post();
         post.setContent(request.getContent());
-        post.setMediaUrl(request.getMediaUrl()); // حاليا هتبقي فاضية لحد ما نعمل رفع الصور
+        post.setMediaUrl(request.getMediaUrl());
         post.setMediaType(request.getMediaType());
-        post.setUser(user); // ربطنا البوست بصاحبه!
+        post.setUser(user);
 
-        // 3. نحفظ في الداتا بيز
         Post savedPost = postRepository.save(post);
 
-        // 4. نرجع البوست في العلبة النضيفة (ResponseDto)
-        return mapToDto(savedPost);
+        // 🌟 بنبعت اليوزر الحالي لدالة التحويل
+        return mapToDto(savedPost, user);
     }
 
-    // 2️⃣ دالة جلب البوستات (بالباجينيشن)
-    public Page<PostResponseDto> getAllPosts(int page, int size) {
-        // بنجهز طلب الباجينيشن (رقم الصفحة، وحجمها)
-        Pageable pageable = PageRequest.of(page, size);
+    // 2️⃣ دالة جلب البوستات (اتعدلت عشان تاخد الإيميل)
+    public Page<PostResponseDto> getAllPosts(int page, int size, String userEmail) {
+        // بنجيب اليوزر اللي فاتح الصفحة دلوقتي
+        User currentUser = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // بنجيب البوستات من الداتا بيز مترتبة
+        Pageable pageable = PageRequest.of(page, size);
         Page<Post> postsPage = postRepository.findAllByOrderByCreatedAtDesc(pageable);
 
-        // بنحول كل Post لـ PostResponseDto عشان الفرونت إند
-        return postsPage.map(this::mapToDto); // استخدام دالة التحويل اللي تحت
+        // 🌟 بنبعت اليوزر الحالي لدالة التحويل عشان نعرف هو داس لايك ولا لأ
+        return postsPage.map(post -> mapToDto(post, currentUser));
     }
 
-    // 🛠️ دالة مساعدة (Helper) عشان تحول من Entity لـ DTO ومانكررش الكود
-    private PostResponseDto mapToDto(Post post) {
+    // 3️⃣ دالة التحويل الذكية (اللي بتعبي العلبة)
+    private PostResponseDto mapToDto(Post post, User currentUser) {
+        // بنعد اللايكات من الداتا بيز
+        long likeCount = postLikesRepository.countByPost(post);
+
+        // بنسأل الداتا بيز: هل اليوزر الحالي عامل لايك للبوست ده؟
+        boolean isLiked = postLikesRepository.findByPostAndUser(post, currentUser).isPresent();
+
         return new PostResponseDto(
                 post.getId(),
                 post.getContent(),
                 post.getMediaUrl(),
                 post.getMediaType(),
                 post.getCreatedAt(),
-                post.getUser().getFullName(), // أخدنا اسم صاحب البوست
-                post.getUser().getEmail()     // أخدنا إيميل صاحب البوست
+                post.getUser().getFullName(),
+                post.getUser().getEmail(),
+                likeCount, // added counts (for like)
+                isLiked    // added this
         );
     }
 }
