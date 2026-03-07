@@ -1,7 +1,7 @@
 <div class="main-wrapper">
 
   <nav class="custom-navbar">
-    <div class="navbar-inner">
+    <div class="navbar-inner container-fluid">
       <span class="logo-text">Friend Finder</span>
       
       <div class="nav-search-wrap d-none d-md-block">
@@ -9,7 +9,7 @@
         <input class="nav-search" type="text" placeholder="Search people, posts…" />
       </div>
       
-      <div class="header-actions">
+      <div class="header-actions ms-auto d-flex align-items-center gap-3">
         <span class="welcome-text d-none d-sm-inline">Hey, <strong>{{ userName }}</strong></span>
         <div class="nav-avatar" title="{{ userName }}">{{ userName.charAt(0).toUpperCase() }}</div>
         <button class="btn-logout" (click)="logout()">Sign out</button>
@@ -95,10 +95,49 @@
                     (click)="toggleLike(post)">
               👍 {{ post.isLiked ? 'Liked' : 'Like' }} ({{ post.likeCount || 0 }})
             </button>
-            <button class="reaction-btn comment">
+            
+            <button class="reaction-btn comment" 
+                    [style.color]="post.showComments ? 'var(--accent-blue)' : ''"
+                    (click)="toggleComments(post)">
               💬 Comment
             </button>
           </div>
+
+          @if (post.showComments) {
+            <div class="comments-section mt-3 pt-3" style="border-top: 1px solid var(--border);">
+              
+              @for (comment of post.commentsList; track comment.id) {
+                <div class="d-flex gap-2 mb-3">
+                  <div class="avatar-circle" style="width: 32px; height: 32px; font-size: 0.8rem;">
+                    {{ comment.authorName.charAt(0).toUpperCase() }}
+                  </div>
+                  <div class="comment-bubble" style="background: var(--bg-input); padding: 0.5rem 0.8rem; border-radius: var(--radius-md); flex: 1; border: 1px solid var(--border);">
+                    <strong style="font-size: 0.85rem; color: var(--text-primary); display: block;">{{ comment.authorName }}</strong>
+                    <span style="font-size: 0.85rem; color: var(--text-secondary);">{{ comment.content }}</span>
+                  </div>
+                </div>
+              }
+
+              <div class="d-flex gap-2 mt-2 align-items-center">
+                <div class="avatar-circle" style="width: 32px; height: 32px; font-size: 0.8rem;">
+                  {{ userName.charAt(0).toUpperCase() }}
+                </div>
+                <input type="text" 
+                       class="form-control custom-input" 
+                       style="height: 38px; min-height: 38px; border-radius: 50px; background: var(--bg-input); border: 1px solid var(--border); color: var(--text-primary); padding-left: 15px;" 
+                       placeholder="Write a comment..." 
+                       [(ngModel)]="post.newCommentText"
+                       (keyup.enter)="submitComment(post)">
+                
+                <button class="btn btn-sm" 
+                        style="background: var(--accent-blue); color: #080a10; border-radius: 50px; font-weight: 600; padding: 0.4rem 1rem;"
+                        (click)="submitComment(post)"
+                        [disabled]="!post.newCommentText?.trim()">
+                  Send
+                </button>
+              </div>
+            </div>
+          }
 
         </div>
       }
@@ -117,7 +156,7 @@
       <div class="glass-card widget-card">
         <p class="widget-title">About</p>
         <p style="font-size:0.82rem; color:var(--text-muted); margin:0; line-height:1.6;">
-          Friend Finder - Built with Spring Boot & Angular.
+          Friend Finder - Built with Spring Boot & Angular By Mohamed Magdy.
         </p>
       </div>
     </aside>

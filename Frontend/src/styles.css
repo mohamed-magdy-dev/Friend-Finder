@@ -38,15 +38,16 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+
 body::before {
   content: '';
   position: fixed;
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(ellipse 80% 50% at 10% 0%,   rgba(0, 212, 170, 0.07) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 50% at 90% 100%, rgba(91, 141, 239, 0.06) 0%, transparent 55%),
-    radial-gradient(ellipse 50% 40% at 50% 50%,  rgba(255, 107, 107, 0.03) 0%, transparent 70%);
+    radial-gradient(ellipse 80% 50% at 10% 0%,   rgba(0, 212, 170, 0.15) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 90% 100%, rgba(91, 141, 239, 0.15) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 40% at 50% 50%,  rgba(255, 107, 107, 0.08) 0%, transparent 70%);
   z-index: 0;
 }
 

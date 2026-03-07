@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router'; 
 import { PostService } from '../../service/post'; 
 import { FormsModule } from '@angular/forms';
+import { CommentsService } from '../../service/comments';
 
 @Component({
   selector: 'app-home', 
@@ -22,7 +23,8 @@ export class Home implements OnInit {
   constructor(
     private router: Router,
     private postService: PostService,
-    private cdr: ChangeDetectorRef // 2. حقنّا الأداة هنا عشان نستخدمها
+    private cdr: ChangeDetectorRef, // 2. حقنّا الأداة هنا عشان نستخدمها
+    private commentsService: CommentsService
   ) {
     const storedName = localStorage.getItem('fullName');
     if (storedName) {
@@ -109,6 +111,37 @@ createPost() {
     });
   }
 
+  // 1️⃣ إظهار وإخفاء مربع التعليقات
+  toggleComments(post: any) {
+    post.showComments = !post.showComments; // بنعكس الحالة (فتح/قفل)
+    
+    // لو فتحنا الكومنتات، ومفيش كومنتات متحملة قبل كده، بنروح نجيبها من الباك إند
+    if (post.showComments && !post.commentsList) {
+      this.commentsService.getCommentsByPostId(post.id).subscribe({
+        next: (res) => {
+          post.commentsList = res; // بنحفظ الكومنتات جوه البوست نفسه
+          this.cdr.detectChanges();
+        },
+        error: (err) => console.error('Error fetching comments', err)
+      });
+    }
+  }
+
+  // 2️⃣ إرسال تعليق جديد
+  submitComment(post: any) {
+    if (!post.newCommentText?.trim()) return; // لو المربع فاضي متعملش حاجة
+
+    this.commentsService.addComment(post.id, post.newCommentText).subscribe({
+      next: (res) => {
+        if (!post.commentsList) post.commentsList = [];
+        post.commentsList.push(res); // بنضيف الكومنت الجديد للستة عشان يظهر فوراً
+        post.newCommentText = ''; // بنفضي مربع الكتابة
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.error('Error adding comment', err)
+    });
+  }
+  
   logout() {
     localStorage.removeItem('token');
     localStorage.removeItem('fullName');
