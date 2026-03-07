@@ -1,17 +1,57 @@
-/* src/styles.css */
-body {
-    margin: 0;
-    padding: 0;
-    font-family: 'Poppins', sans-serif; /* الخط المودرن */
-    background-color: #f0f2f5; /* لون خلفية هادي */
-    /* شيلنا الـ flex والـ centering اللي كان خانق الدنيا */
-    overflow-x: hidden; /* لمنع السكرول العرضي الزيادة */
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap');
+
+/* ── Design Tokens (الألوان الأساسية) ── */
+:root {
+  --bg-void:       #080a10;
+  --bg-surface:    rgba(255, 255, 255, 0.042);
+  --bg-surface-hv: rgba(255, 255, 255, 0.07);
+  --bg-input:      rgba(255, 255, 255, 0.03);
+  --border:        rgba(255, 255, 255, 0.075);
+  --border-focus:  rgba(0, 212, 170, 0.5);
+  --accent-teal:   #00d4aa;
+  --accent-coral:  #ff6b6b;
+  --accent-blue:   #5b8def;
+  --text-primary:  #eef2f7;
+  --text-secondary:#8899aa;
+  --text-muted:    #55677a;
+  --radius-sm:  8px;
+  --radius-md:  14px;
+  --radius-lg:  20px;
+  --radius-xl:  28px;
+  --shadow-card: 0 4px 24px rgba(0,0,0,0.45), 0 1px 0 rgba(255,255,255,0.04) inset;
+  --shadow-glow: 0 0 20px rgba(0, 212, 170, 0.18);
+  --font-display: 'Syne', sans-serif;
+  --font-body:    'DM Sans', sans-serif;
+  --ease-smooth:  cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-bounce:  cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-/* ده كلاس مساعد هنستخدمه وقت ما نحب نوسطن حاجة بمزاجنا، مش غصب عننا */
-.center-content {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
+*, *::before, *::after { box-sizing: border-box; }
+
+/* ── خلفية المشروع كله ── */
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  background-color: var(--bg-void);
+  color: var(--text-primary);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
 }
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 80% 50% at 10% 0%,   rgba(0, 212, 170, 0.07) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 90% 100%, rgba(91, 141, 239, 0.06) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 40% at 50% 50%,  rgba(255, 107, 107, 0.03) 0%, transparent 70%);
+  z-index: 0;
+}
+
+/* ── شكل الـ Scrollbar ── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
