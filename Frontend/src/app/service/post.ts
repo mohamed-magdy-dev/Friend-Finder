@@ -31,13 +31,11 @@ export class PostService {
     // بنبعت الطلب كـ POST للباك إند ومعاه الداتا (اللي هي النص)
     return this.http.post<any>(this.apiUrl, postData, { headers });
   }
-  toggleLike(postId: number): Observable<any> {
-    const token = localStorage.getItem('token');
+ likePost(postId: number): Observable<any> {
     const headers = new HttpHeaders({
-      'Authorization': `Bearer ${token}`
+      'Authorization': `Bearer ${localStorage.getItem('token')}`
     });
-
-    // لاحظ إننا ضفنا الـ postId في اللينك زي ما عملنا في سبرينج بوت
+    // اتأكد إن اللينك ده نفس اللي إنت عامله في الـ Backend
     return this.http.post<any>(`${this.apiUrl}/${postId}/like`, {}, { headers });
   }
 }

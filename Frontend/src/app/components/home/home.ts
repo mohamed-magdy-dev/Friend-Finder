@@ -65,26 +65,54 @@ createPost() {
       }
     });}
 
-    toggleLike(post: any) {
-    this.postService.toggleLike(post.id).subscribe({
+// 1️⃣ دالة اللايك (النسخة الحاسمة والمحمية)
+  toggleLike(post: any) {
+    // 1. نحدث الشاشة فوراً والزرار ينور ويفضل منور
+    post.isLiked = !post.isLiked;
+    post.likeCount = post.isLiked ? (post.likeCount || 0) + 1 : Math.max(0, (post.likeCount || 1) - 1);
+    this.cdr.detectChanges();
+
+    // 2. نبعت الطلب للباك إند في صمت
+    this.postService.likePost(post.id).subscribe({
       next: (res: any) => {
-        // التريكة هنا: إحنا بنغير حالة البوست في الفرونت إند فوراً عشان اليوزر يحس بسرعة الموقع
-        if (res.message === 'Liked') {
-          post.isLiked = true; // بنعلم إنه معموله لايك
-          post.likeCount = (post.likeCount || 0) + 1;
-        } else if (res.message === 'Unliked') {
-          post.isLiked = false; // بنشيل العلامة
-          post.likeCount = Math.max(0, (post.likeCount || 1) - 1);
-        }
-        
-        // بنصحي الحارس عشان يغير لون الزرار في الـ HTML
-        this.cdr.detectChanges(); 
+        // السيرفر رد بنجاح، مش هنعدل الشاشة تاني عشان الزرار مايطفيش
+        console.log('Liked successfully on backend');
       },
       error: (err: any) => {
-        console.error('Error toggling like:', err);
+        // لو الإيرور ده بسبب إن الباك إند رد بـ Text مش JSON، بس الستاتس 200 (نجاح)
+        // يبقى مفيش مشكلة حقيقية، ومش هنلغي اللايك.
+        if (err.status === 200 || err.status === 201) {
+           console.log('Backend success but parse error (Ignored)');
+           return; // اخرج وماتعملش حاجة
+        }
+
+        // إنما لو السيرفر ضرب إيرور حقيقي (400 أو 500)، هنا بس نلغي اللايك
+        console.error('Real Error liking post:', err);
+        post.isLiked = !post.isLiked;
+        post.likeCount = post.isLiked ? (post.likeCount || 0) + 1 : Math.max(0, (post.likeCount || 1) - 1);
+        this.cdr.detectChanges();
       }
     });
   }
+
+  // 2️⃣ دالة إظهار التعليقات (بتفتح فوراً وتجيب الداتا في الخلفية)
+  toggleComments(post: any) {
+    // 1. نفتح أو نقفل المربع فوراً
+    post.showComments = !post.showComments;
+    this.cdr.detectChanges(); // تحديث فوري للشاشة
+
+    // 2. لو فتحنا المربع والتعليقات لسه متحملتش، نروح نجيبها
+    if (post.showComments && !post.commentsList) {
+      this.commentsService.getCommentsByPostId(post.id).subscribe({
+        next: (res) => {
+          post.commentsList = res;
+          this.cdr.detectChanges(); // تحديث الشاشة بعد وصول الداتا
+        },
+        error: (err) => console.error('Error fetching comments', err)
+      });
+    }
+  }
+
 
   loadPosts() {
     this.isLoading = true;
@@ -111,22 +139,7 @@ createPost() {
     });
   }
 
-  // 1️⃣ إظهار وإخفاء مربع التعليقات
-  toggleComments(post: any) {
-    post.showComments = !post.showComments; // بنعكس الحالة (فتح/قفل)
-    
-    // لو فتحنا الكومنتات، ومفيش كومنتات متحملة قبل كده، بنروح نجيبها من الباك إند
-    if (post.showComments && !post.commentsList) {
-      this.commentsService.getCommentsByPostId(post.id).subscribe({
-        next: (res) => {
-          post.commentsList = res; // بنحفظ الكومنتات جوه البوست نفسه
-          this.cdr.detectChanges();
-        },
-        error: (err) => console.error('Error fetching comments', err)
-      });
-    }
-  }
-
+ 
   // 2️⃣ إرسال تعليق جديد
   submitComment(post: any) {
     if (!post.newCommentText?.trim()) return; // لو المربع فاضي متعملش حاجة
