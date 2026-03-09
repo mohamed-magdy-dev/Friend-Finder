@@ -3,14 +3,19 @@
 /* NAVBAR */
 .custom-navbar {
   position: sticky; top: 0; z-index: 100;
-  background: rgba(8, 10, 16, 0.78); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--border); padding: 0 1.5rem; height: 60px;
+  background: rgba(8, 10, 16, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255,255,255,0.05); padding: 0; height: 60px;
   display: flex; align-items: center; justify-content: center;
 }
 .navbar-inner { 
-  display: flex; align-items: center; justify-content: space-between; /* دي اللي بتوزعهم يمين وشمال */
-  width: 100%; max-width: 1600px; /* وسعنا العرض هنا */
+  display: flex; align-items: center; justify-content: space-between; 
+  width: 100%; 
+  max-width: 1300px; /* وحدنا العرض هنا مع اللي تحت */
+  padding: 0 1.5rem;
 }
+ /* .navbar-inner { 
+  display: flex; align-items: center; justify-content: space-between; 
+  width: 100%; max-width: 1600px; } */
 
 .logo-text { flex: 1; font-family: var(--font-display); font-weight: 800; font-size: 1.25rem; background: linear-gradient(135deg, var(--accent-teal) 0%, var(--accent-blue) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 .nav-search-wrap { flex: 1; position: relative; max-width: 400px; margin: 0 auto; display: flex; justify-content: center; }
@@ -32,12 +37,23 @@
 /* LAYOUT */
 .feed-layout { 
   display: grid; 
-  grid-template-columns: 260px 1fr 300px; /* كبرنا القوايم الجانبية شوية عشان التناسق */
-  gap: 1.5rem; 
-  max-width: 1600px; /* وسعنا مساحة البوستات والقوايم */
+  /* 260px للقايمة الشمال
+    minmax(500px, 650px) للبوستات: يعني البوست عمره ما هيبعرض عن 650 بيكسل مهما شاشتك كبرت!
+    300px للقايمة اليمين
+  */
+  grid-template-columns: 260px minmax(500px, 650px) 300px; 
+  justify-content: center; /* بيحط الـ 3 أعمدة دول في نص الشاشة بالظبط ويسيب الباقي يمين وشمال فاضي بنظافة */
+  gap: 2rem; 
+  width: 100%;
+  max-width: 1400px; 
   margin: 1.5rem auto; padding: 0 1.5rem 3rem; align-items: start; 
 }
-@media (max-width: 1024px) { .feed-layout { grid-template-columns: 1fr; max-width: 100%; padding: 0 10px; } .sidebar-left, .sidebar-right { display: none; } }
+@media (max-width: 1024px) { 
+.feed-layout { 
+  grid-template-columns: 1fr; max-width: 100%; padding: 0 10px; } 
+  .sidebar-left, .sidebar-right {
+     display: none; } }
+
 
 /* GLASS CARD */
 .glass-card { background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow-card); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
@@ -104,7 +120,11 @@
 
 .post-footer { display: flex; align-items: center; gap: 0.25rem; border-top: 1px solid var(--border); padding-top: 0.75rem; }
 .reaction-btn { display: flex; align-items: center; gap: 0.35rem; background: transparent; border: none; color: var(--text-muted); font-size: 0.82rem; padding: 0.4rem 0.75rem; border-radius: var(--radius-sm); cursor: pointer; transition: all 0.2s; font-family: var(--font-body); font-weight: 500; }
-.reaction-btn:hover { background: var(--bg-surface-hv); color: var(--text-primary); }
+.reaction-btn:hover { 
+    background: rgba(255, 255, 255, 0.05); 
+    color: var(--text-primary); 
+    box-shadow: none; 
+}
 .reaction-btn.like:hover { color: var(--accent-coral); }
 .reaction-btn.comment:hover { color: var(--accent-blue); }
 

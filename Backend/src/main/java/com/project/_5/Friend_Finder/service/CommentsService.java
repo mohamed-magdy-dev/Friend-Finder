@@ -2,7 +2,7 @@ package com.project._5.Friend_Finder.service;
 
 import com.project._5.Friend_Finder.dto.CommentsRequestDto;
 import com.project._5.Friend_Finder.dto.CommentsResponseDto;
-import com.project._5.Friend_Finder.entity.Comment; 
+import com.project._5.Friend_Finder.entity.Comment;
 import com.project._5.Friend_Finder.entity.Post;
 import com.project._5.Friend_Finder.entity.User;
 import com.project._5.Friend_Finder.repository.CommentsRepository;
