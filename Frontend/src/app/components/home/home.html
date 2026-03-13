@@ -160,15 +160,33 @@
         <div class="ff-card p-3 mb-3 ff-anim ff-d1">
           <p class="ff-widget-label"><i class="bi bi-person-plus-fill me-1"></i> Who to Follow</p>
           <div class="d-flex flex-column gap-3">
-            <div class="d-flex align-items-center gap-2 ff-suggest-item">
-              <div class="ff-post-avatar" style="width:36px;height:36px;font-size:.85rem;background:hsl(30,70%,52%)">A</div>
-              <div><p class="ff-suggest-name">Ali Sayed</p><p class="ff-suggest-meta">3 mutual friends</p></div>
-              <button class="ff-btn-add ms-auto">+ Add</button>
-            </div>
+            
+            @for (user of suggestedUsers; track user.id) {
+              <div class="d-flex align-items-center gap-2 ff-suggest-item">
+                <div class="ff-post-avatar" 
+                     [style.background]="'hsl(' + ((user.fullName.charCodeAt(0) || 65) * 137 % 360) + ',70%,52%)'"
+                     style="width:36px;height:36px;font-size:.85rem;">
+                  {{ user.fullName.charAt(0).toUpperCase() }}
+                </div>
+                
+                <div>
+                  <p class="ff-suggest-name">{{ user.fullName }}</p>
+                  <p class="ff-suggest-meta">Suggested for you</p>
+                </div>
+                
+                <button class="ff-btn-add ms-auto">+ Add</button>
+              </div>
+            }
+
+            @if (suggestedUsers.length === 0) {
+              <p class="text-muted small text-center my-2">No suggestions right now.</p>
+            }
+
           </div>
         </div>
       </aside>
 
+      
     </div>
   </div>
 </div>

@@ -24,4 +24,15 @@ export class UserService {
     // 3. بنبعت الطلب (GET) ومعاه التوكن
     return this.http.get<any[]>(this.apiUrl, { headers });
   }
+
+  getSuggestedUsers(): Observable<any[]> {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+    // بتنادي على الـ Endpoint الجديد اللي عملناه في الباك إند
+    return this.http.get<any[]>(`${this.apiUrl}/suggestions`, { headers });
+  }
+
+  
 }

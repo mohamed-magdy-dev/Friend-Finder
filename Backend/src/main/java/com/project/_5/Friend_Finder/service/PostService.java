@@ -19,7 +19,7 @@ public class PostService {
 
     private final PostRepository postRepository;
     private final UserRepository userRepository;
-    private final PostLikesRepository postLikesRepository; // 🌟 حقنّا ريبو اللايكات هنا
+    private final PostLikesRepository postLikesRepository;
 
     // create post
     public PostResponseDto createPost(PostRequestDto request, String userEmail) {
@@ -34,29 +34,30 @@ public class PostService {
 
         Post savedPost = postRepository.save(post);
 
-        // 🌟 بنبعت اليوزر الحالي لدالة التحويل
+        // sending current user to dto
         return mapToDto(savedPost, user);
     }
 
-    // 2️⃣ دالة جلب البوستات (اتعدلت عشان تاخد الإيميل)
+    // method for bringing the posts
     public Page<PostResponseDto> getAllPosts(int page, int size, String userEmail) {
-        // بنجيب اليوزر اللي فاتح الصفحة دلوقتي
+      // bring the user that is opening the page now
+
         User currentUser = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         Pageable pageable = PageRequest.of(page, size);
         Page<Post> postsPage = postRepository.findAllByOrderByCreatedAtDesc(pageable);
 
-        // 🌟 بنبعت اليوزر الحالي لدالة التحويل عشان نعرف هو داس لايك ولا لأ
+        // sending the current user to convert method to check if he liked (pressed like) or not
         return postsPage.map(post -> mapToDto(post, currentUser));
     }
 
-    // 3️⃣ دالة التحويل الذكية (اللي بتعبي العلبة)
+    // method of  smart switching (dto stuff!)
     private PostResponseDto mapToDto(Post post, User currentUser) {
-        // بنعد اللايكات من الداتا بيز
+        // we count the likes from the database
         long likeCount = postLikesRepository.countByPost(post);
 
-        // بنسأل الداتا بيز: هل اليوزر الحالي عامل لايك للبوست ده؟
+        // asking the DB if user currently liked the video?
         boolean isLiked = postLikesRepository.findByPostAndUser(post, currentUser).isPresent();
 
         return new PostResponseDto(

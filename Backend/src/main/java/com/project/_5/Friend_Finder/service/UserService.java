@@ -14,7 +14,7 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-    // ميثود تجيب كل الناس وتحولهم لـ DTO
+    // method for calling all users and convert them to DTO
     public List<UserResponseDto> getAllUsers() {
         List<User> users = userRepository.findAll();
 
@@ -24,6 +24,16 @@ public class UserService {
                         user.getFullName(),
                         user.getEmail()
                 ))
+                .collect(Collectors.toList());
+    }
+    // this for suggested friends function --->
+    public List<UserResponseDto> getSuggestedUsers(String currentUserEmail) {
+        // calling the first 5 users from database (without the current user ofc!)
+        List<User> suggestedUsers = userRepository.findTop5ByEmailNot(currentUserEmail);
+
+        // we transfer them into safe DTOs
+        return suggestedUsers.stream()
+                .map(user -> new UserResponseDto(user.getId(), user.getFullName(), user.getEmail()))
                 .collect(Collectors.toList());
     }
 }

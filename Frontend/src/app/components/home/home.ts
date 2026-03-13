@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { PostService } from '../../service/post'; 
 import { FormsModule } from '@angular/forms';
 import { CommentsService } from '../../service/comments';
+import { UserService } from '../../service/user';
 
 @Component({
   selector: 'app-home', 
@@ -20,11 +21,13 @@ export class Home implements OnInit {
   errorMessage: string = ''; 
   newPostContent: string = ''; 
   isPosting: boolean = false;
+  suggestedUsers: any[] = [];
   constructor(
     private router: Router,
     private postService: PostService,
     private cdr: ChangeDetectorRef, // 2. حقنّا الأداة هنا عشان نستخدمها
-    private commentsService: CommentsService
+    private commentsService: CommentsService,
+    private userService: UserService
   ) {
     const storedName = localStorage.getItem('fullName');
     if (storedName) {
@@ -34,8 +37,18 @@ export class Home implements OnInit {
 
   ngOnInit() {
     this.loadPosts();
+    this.loadSuggestedUsers();
   }
 
+  loadSuggestedUsers() {
+    this.userService.getSuggestedUsers().subscribe({
+      next: (res: any) => {
+        this.suggestedUsers = res;
+        this.cdr.detectChanges(); // السطر السحري عشان نعرضهم فوراً
+      },
+      error: (err: any) => console.error('Error fetching suggested users:', err)
+    });
+  }
 
 createPost() {
     // لو المربع فاضي، متعملش حاجة
