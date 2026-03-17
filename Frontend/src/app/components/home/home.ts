@@ -5,7 +5,7 @@ import { PostService } from '../../service/post';
 import { FormsModule } from '@angular/forms';
 import { CommentsService } from '../../service/comments';
 import { UserService } from '../../service/user';
-
+import { NotificationService } from '../../service/notification';
 @Component({
   selector: 'app-home', 
   standalone: true,     
@@ -23,12 +23,18 @@ export class Home implements OnInit {
   isPosting: boolean = false;
   suggestedUsers: any[] = [];
   pendingRequests: any[] = [];
+  // notification:
+  notifications: any[] = [];
+  unreadNotificationsCount: number = 0;
+ isNotificationOpen: boolean = false;
+  isFriendRequestOpen: boolean = false; // for angular vs bootstrap thing
   constructor(
     private router: Router,
     private postService: PostService,
-    private cdr: ChangeDetectorRef, // 2. حقنّا الأداة هنا عشان نستخدمها
+    private cdr: ChangeDetectorRef, 
     private commentsService: CommentsService,
-    private userService: UserService
+    private userService: UserService,
+    private notificationService: NotificationService
   ) {
     const storedName = localStorage.getItem('fullName');
     if (storedName) {
@@ -40,8 +46,16 @@ export class Home implements OnInit {
     this.loadPosts();
     this.loadSuggestedUsers();
     this.loadPendingRequests();
+    this.loadNotifications();
   }
-
+toggleNotifications() {
+    this.isNotificationOpen = !this.isNotificationOpen;
+    this.isFriendRequestOpen = false; // Close the other
+  }
+  toggleFriendRequests() {
+    this.isFriendRequestOpen = !this.isFriendRequestOpen;
+    this.isNotificationOpen = false; // Close the other
+  }
  loadSuggestedUsers() {
     this.userService.getSuggestedUsers().subscribe({
       next: (res: any[]) => {
@@ -51,7 +65,6 @@ export class Home implements OnInit {
           return user;
         });
         
-        // Trigger UI update
         this.cdr.detectChanges(); 
       },
       error: (err: any) => console.error('Error fetching suggested users:', err)
@@ -59,25 +72,23 @@ export class Home implements OnInit {
   }
 
 createPost() {
-    // لو المربع فاضي، متعملش حاجة
     if (!this.newPostContent.trim()) return; 
 
-    this.isPosting = true; // عشان نقفل الزرار واليوزر ميكررش الطلب
+    this.isPosting = true; 
 
     const request = {
       content: this.newPostContent,
-      mediaType: 'TEXT' // مؤقتاً لحد ما نعمل رفع الصور
+      mediaType: 'TEXT' 
     };
 
     this.postService.createPost(request).subscribe({
       next: (res: any) => {
-        // السطر ده سحري: بيحط البوست الجديد في "أول" المصفوفة عشان يظهر فوق خالص
         this.posts.unshift(res); 
         
-        this.newPostContent = ''; // بنفضي المربع تاني
+        this.newPostContent = ''; 
         this.isPosting = false;
         
-        this.cdr.detectChanges(); // بنصحي الحارس عشان يحدّث الشاشة
+        this.cdr.detectChanges();
       },
       error: (err: any) => {
         console.error('Error creating post:', err);
@@ -86,28 +97,21 @@ createPost() {
       }
     });}
 
-// 1️⃣ دالة اللايك (النسخة الحاسمة والمحمية)
   toggleLike(post: any) {
-    // 1. نحدث الشاشة فوراً والزرار ينور ويفضل منور
     post.isLiked = !post.isLiked;
     post.likeCount = post.isLiked ? (post.likeCount || 0) + 1 : Math.max(0, (post.likeCount || 1) - 1);
     this.cdr.detectChanges();
 
-    // 2. نبعت الطلب للباك إند في صمت
     this.postService.likePost(post.id).subscribe({
       next: (res: any) => {
-        // السيرفر رد بنجاح، مش هنعدل الشاشة تاني عشان الزرار مايطفيش
         console.log('Liked successfully on backend');
       },
-      error: (err: any) => {
-        // لو الإيرور ده بسبب إن الباك إند رد بـ Text مش JSON، بس الستاتس 200 (نجاح)
-        // يبقى مفيش مشكلة حقيقية، ومش هنلغي اللايك.
+      error: (err: any) => { 
         if (err.status === 200 || err.status === 201) {
            console.log('Backend success but parse error (Ignored)');
-           return; // اخرج وماتعملش حاجة
+           return; 
         }
 
-        // إنما لو السيرفر ضرب إيرور حقيقي (400 أو 500)، هنا بس نلغي اللايك
         console.error('Real Error liking post:', err);
         post.isLiked = !post.isLiked;
         post.likeCount = post.isLiked ? (post.likeCount || 0) + 1 : Math.max(0, (post.likeCount || 1) - 1);
@@ -116,18 +120,17 @@ createPost() {
     });
   }
 
-  // 2️⃣ دالة إظهار التعليقات (بتفتح فوراً وتجيب الداتا في الخلفية)
+ 
   toggleComments(post: any) {
-    // 1. نفتح أو نقفل المربع فوراً
+    
     post.showComments = !post.showComments;
-    this.cdr.detectChanges(); // تحديث فوري للشاشة
+    this.cdr.detectChanges(); 
 
-    // 2. لو فتحنا المربع والتعليقات لسه متحملتش، نروح نجيبها
     if (post.showComments && !post.commentsList) {
       this.commentsService.getCommentsByPostId(post.id).subscribe({
         next: (res) => {
           post.commentsList = res;
-          this.cdr.detectChanges(); // تحديث الشاشة بعد وصول الداتا
+          this.cdr.detectChanges(); 
         },
         error: (err) => console.error('Error fetching comments', err)
       });
@@ -142,7 +145,6 @@ createPost() {
         this.posts = res.content ? res.content : (Array.isArray(res) ? res : []); 
         this.isLoading = false; 
         
-        // 3. السطر السحري: "يا أنجولار، أنا غيرت الداتا، حدث الـ HTML فوراً دلوقتي!"
         this.cdr.detectChanges(); 
       },
       error: (err: any) => {
@@ -150,7 +152,7 @@ createPost() {
         this.errorMessage = 'Failed to load posts. Check console.';
         this.isLoading = false;
         
-        // إجبار التحديث حتى لو في حالة الإيرور
+        
         this.cdr.detectChanges(); 
 
         if (err.status === 403) {
@@ -161,15 +163,15 @@ createPost() {
   }
 
  
-  // 2️⃣ إرسال تعليق جديد
+  
   submitComment(post: any) {
-    if (!post.newCommentText?.trim()) return; // لو المربع فاضي متعملش حاجة
+    if (!post.newCommentText?.trim()) return; 
 
     this.commentsService.addComment(post.id, post.newCommentText).subscribe({
       next: (res) => {
         if (!post.commentsList) post.commentsList = [];
-        post.commentsList.push(res); // بنضيف الكومنت الجديد للستة عشان يظهر فوراً
-        post.newCommentText = ''; // بنفضي مربع الكتابة
+        post.commentsList.push(res); 
+        post.newCommentText = ''; 
         this.cdr.detectChanges();
       },
       error: (err) => console.error('Error adding comment', err)
@@ -182,24 +184,23 @@ createPost() {
     this.router.navigate(['/login']);
   }
 
-// 3️⃣ دالة إرسال أو إلغاء طلب الصداقة (الواجهة المتفائلة)
+
   toggleFriendRequest(user: any) {
     if (user.isRequestSent) {
-      // ❌ لو الطلب مبعوت، يبقى اليوزر عاوز يلغيه
-      user.isRequestSent = false; // بنعدل الشاشة فوراً
+      
+      user.isRequestSent = false; 
       this.cdr.detectChanges();
       
       this.userService.cancelFriendRequest(user.id).subscribe({
         next: () => console.log('Request cancelled successfully'),
         error: (err: any) => {
           console.error('Error cancelling request', err);
-          user.isRequestSent = true; // لو حصل إيرور نرجع الزرار زي ما كان
+          user.isRequestSent = true; 
           this.cdr.detectChanges();
         }
       });
       
     } else {
-      // ✅ لو الطلب مش مبعوت، يبقى اليوزر عاوز يبعته
       user.isRequestSent = true; 
       this.cdr.detectChanges();
 
@@ -215,9 +216,9 @@ createPost() {
   }
 
 
-  /**
-   * Loads all pending friend requests from the backend.
-   */
+  
+   // Loads all pending friend requests from the backend.
+   
   loadPendingRequests() {
     this.userService.getPendingFriendRequests().subscribe({
       next: (res: any[]) => {
@@ -228,9 +229,9 @@ createPost() {
     });
   }
 
-  /**
-   * Accepts a friend request and removes it from the UI instantly.
-   */
+
+   // Accepts a friend request and removes it from the UI instantly.
+   
   acceptRequest(requestId: number) {
     // Optimistic UI update: Remove the request from the array immediately
     this.pendingRequests = this.pendingRequests.filter(req => req.requestId !== requestId);
@@ -247,9 +248,9 @@ createPost() {
     });
   }
 
-  /**
-   * Rejects a friend request and removes it from the UI instantly.
-   */
+ 
+   // Rejects a friend request and removes it from the UI instantly.
+   
   rejectRequest(requestId: number) {
     // Optimistic UI update: Remove the request from the array immediately
     this.pendingRequests = this.pendingRequests.filter(req => req.requestId !== requestId);
@@ -263,6 +264,38 @@ createPost() {
         // If it fails, reload the list to restore the removed request
         this.loadPendingRequests();
       }
+    });
+  }
+
+ 
+    //Loads notifications and calculates the unread count:
+ 
+  loadNotifications() {
+    this.notificationService.getNotifications().subscribe({
+      next: (res: any[]) => {
+        this.notifications = res;
+        // Count how many notifications have isRead === false
+        this.unreadNotificationsCount = this.notifications.filter(n => !n.read).length;
+        this.cdr.detectChanges();
+      },
+      error: (err: any) => console.error('Error fetching notifications:', err)
+    });
+  }
+
+  
+    // Marks a notification as read and updates the UI instantly.
+  
+  markNotificationAsRead(notification: any) {
+    if (notification.read) return; // Already read, do nothing
+
+    // Optimistic UI update
+    notification.read = true;
+    this.unreadNotificationsCount = Math.max(0, this.unreadNotificationsCount - 1);
+    this.cdr.detectChanges();
+
+    // Send update to backend
+    this.notificationService.markAsRead(notification.id).subscribe({
+      error: (err: any) => console.error('Error marking notification as read:', err)
     });
   }
 }

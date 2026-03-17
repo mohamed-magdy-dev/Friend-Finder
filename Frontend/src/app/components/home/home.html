@@ -1,4 +1,3 @@
-
 <div class="ff-page-wrap">
 
   <nav class="ff-navbar d-flex align-items-center px-3 px-lg-4">
@@ -11,11 +10,104 @@
       </div>
       
       <div class="ms-auto d-flex align-items-center gap-3">
-        <span class="d-none d-sm-block" style="font-size:.82rem; color:var(--ff-clr-ink-2);">
+        
+        <div class="position-relative">
+          <button class="btn btn-link text-dark position-relative p-1 border-0" 
+                  (click)="toggleFriendRequests()" style="background: transparent;">
+            <i class="bi bi-people-fill fs-4"></i>
+            @if (pendingRequests.length > 0) {
+              <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" 
+                    style="font-size: 0.65rem; transform: translate(-30%, 10%) !important;">
+                {{ pendingRequests.length }}
+              </span>
+            }
+          </button>
+
+          @if (isFriendRequestOpen) {
+            <div class="dropdown-menu show shadow position-absolute mt-2 p-0" 
+                 style="right: 0; left: auto; width: 320px; max-height: 400px; overflow-y: auto; z-index: 1050; border-radius: 10px;">
+              <div class="dropdown-header d-flex justify-content-between align-items-center p-3 border-bottom">
+                <h6 class="mb-0 fw-bold text-dark">Friend Requests</h6>
+              </div>
+              
+              <div class="p-2">
+                @if (pendingRequests.length === 0) {
+                  <p class="text-center text-muted small p-3 mb-0">No new requests.</p>
+                }
+                @for (req of pendingRequests; track req.requestId) {
+                  <div class="d-flex align-items-center gap-2 p-2 border-bottom">
+                    <div class="ff-post-avatar" 
+                         [style.background]="'hsl(' + ((req.senderName.charCodeAt(0) || 65) * 137 % 360) + ',70%,52%)'"
+                         style="width:40px;height:40px;font-size:1rem;">
+                      {{ req.senderName.charAt(0).toUpperCase() }}
+                    </div>
+                    <div style="flex: 1; min-width: 0;">
+                      <p class="fw-bold mb-0 text-truncate" style="font-size: 0.9rem;">{{ req.senderName }}</p>
+                      <div class="d-flex gap-2 mt-1">
+                        <button class="btn btn-primary flex-grow-1" style="font-size: 0.8rem; padding: 0.2rem;" (click)="acceptRequest(req.requestId)">Confirm</button>
+                        <button class="btn btn-light border flex-grow-1" style="font-size: 0.8rem; padding: 0.2rem;" (click)="rejectRequest(req.requestId)">Delete</button>
+                      </div>
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+
+        <div class="position-relative">
+          <button class="btn btn-link text-dark position-relative p-1 border-0" 
+                  (click)="toggleNotifications()" style="background: transparent;">
+            <i class="bi bi-bell-fill fs-4"></i>
+            @if (unreadNotificationsCount > 0) {
+              <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" 
+                    style="font-size: 0.65rem; transform: translate(-30%, 10%) !important;">
+                {{ unreadNotificationsCount }}
+              </span>
+            }
+          </button>
+
+          @if (isNotificationOpen) {
+            <div class="dropdown-menu show shadow position-absolute mt-2 p-0" 
+                 style="right: 0; left: auto; width: 320px; max-height: 400px; overflow-y: auto; z-index: 1050; border-radius: 10px;">
+              <div class="dropdown-header d-flex justify-content-between align-items-center p-3 border-bottom">
+                <h6 class="mb-0 fw-bold text-dark">Notifications</h6>
+              </div>
+              <ul class="list-unstyled mb-0">
+                @if (notifications.length === 0) {
+                  <li class="p-4 text-center text-muted small">No notifications yet.</li>
+                }
+                @for (notif of notifications; track notif.id) {
+                  <li>
+                    <a class="dropdown-item p-3 border-bottom" 
+                       style="cursor: pointer; white-space: normal; transition: background-color 0.2s;" 
+                       [ngClass]="{'bg-light': !notif.read}" 
+                       (click)="markNotificationAsRead(notif)">
+                      <div class="d-flex justify-content-between align-items-start">
+                        <span class="small" [ngClass]="{'fw-bold text-dark': !notif.read, 'text-muted': notif.read}">
+                          {{ notif.message }}
+                        </span>
+                        @if (!notif.read) {
+                          <span class="badge bg-primary rounded-circle p-1 ms-2 mt-1" style="width: 8px; height: 8px;"></span>
+                        }
+                      </div>
+                      <small class="text-secondary d-block mt-1" style="font-size: 0.75rem;">
+                        {{ notif.createdAt | date:'short' }}
+                      </small>
+                    </a>
+                  </li>
+                }
+              </ul>
+            </div>
+          }
+        </div>
+
+        <span class="d-none d-sm-block ms-2" style="font-size:.82rem; color:var(--ff-clr-ink-2);">
           Hey, <strong style="color:var(--ff-clr-ink); font-weight:700;">{{ userName }}</strong>
         </span>
         <div class="ff-nav-avatar">{{ userName.charAt(0).toUpperCase() }}</div>
         <button class="ff-btn-signout d-none d-sm-block" (click)="logout()">Sign out</button>
+        
       </div>
     </div>
   </nav>
@@ -156,47 +248,8 @@
 
       </main>
 
-
-
       <aside class="col-lg-3 col-xl-3 ff-sidebar-right">
-        @if (pendingRequests.length > 0) {
-        <div class="ff-card p-3 mb-3 ff-anim ff-d1">
-          <p class="ff-widget-label">
-            <i class="bi bi-bell-fill me-1 text-warning"></i> Friend Requests 
-            <span class="badge bg-danger rounded-pill ms-1">{{ pendingRequests.length }}</span>
-          </p>
-          <div class="d-flex flex-column gap-3">
-            
-            @for (req of pendingRequests; track req.requestId) {
-              <div class="d-flex align-items-center gap-2 ff-suggest-item">
-                <div class="ff-post-avatar" 
-                     [style.background]="'hsl(' + ((req.senderName.charCodeAt(0) || 65) * 137 % 360) + ',70%,52%)'"
-                     style="width:36px;height:36px;font-size:.85rem;">
-                  {{ req.senderName.charAt(0).toUpperCase() }}
-                </div>
-                
-                <div style="flex: 1; min-width: 0;">
-                  <p class="ff-suggest-name text-truncate mb-0" title="{{ req.senderName }}">{{ req.senderName }}</p>
-                </div>
-                
-                <div class="d-flex gap-1">
-                  <button class="btn btn-sm btn-primary" 
-                          style="padding: 0.2rem 0.5rem; font-size: 0.8rem; border-radius: 50px;" 
-                          (click)="acceptRequest(req.requestId)">
-                    Accept
-                  </button>
-                  <button class="btn btn-sm btn-light text-danger border" 
-                          style="padding: 0.2rem 0.5rem; font-size: 0.8rem; border-radius: 50px;" 
-                          (click)="rejectRequest(req.requestId)">
-                    Decline
-                  </button>
-                </div>
-              </div>
-            }
-
-          </div>
-        </div>
-      }
+        
         <div class="ff-card p-3 mb-3 ff-anim ff-d1">
           <p class="ff-widget-label"><i class="bi bi-person-plus-fill me-1"></i> Who to Follow</p>
           <div class="d-flex flex-column gap-3">
@@ -214,13 +267,13 @@
                   <p class="ff-suggest-meta">Suggested for you</p>
                 </div>
                 
-                          <button class="ff-btn-add ms-auto" 
-                    (click)="toggleFriendRequest(user)" 
-                    [style.background]="user.isRequestSent ? 'var(--ff-clr-page)' : ''"
-                    [style.color]="user.isRequestSent ? 'var(--ff-clr-ink-2)' : ''"
-                    [style.borderColor]="user.isRequestSent ? 'var(--ff-clr-border)' : ''">
-              {{ user.isRequestSent ? 'Cancel' : '+ Add' }}
-            </button>
+                <button class="ff-btn-add ms-auto" 
+                        (click)="toggleFriendRequest(user)" 
+                        [style.background]="user.isRequestSent ? 'var(--ff-clr-page)' : ''"
+                        [style.color]="user.isRequestSent ? 'var(--ff-clr-ink-2)' : ''"
+                        [style.borderColor]="user.isRequestSent ? 'var(--ff-clr-border)' : ''">
+                  {{ user.isRequestSent ? 'Cancel' : '+ Add' }}
+                </button>
               </div>
             }
 
@@ -230,8 +283,8 @@
 
           </div>
         </div>
+        
       </aside>
-
       
     </div>
   </div>
