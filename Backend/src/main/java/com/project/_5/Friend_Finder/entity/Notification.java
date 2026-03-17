@@ -20,14 +20,14 @@ public class Notification {
     @Column(nullable = false)
     private String message;
 
-    // الإشعار اتقرأ ولا لسه؟ (الديفولت بتاعه false)
+
     @Column(nullable = false)
     private boolean isRead = false;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    // الإشعار ده رايح لمين
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;

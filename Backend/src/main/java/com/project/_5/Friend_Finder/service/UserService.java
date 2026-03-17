@@ -1,6 +1,8 @@
 package com.project._5.Friend_Finder.service;
-import com.project._5.Friend_Finder.dto.UserResponseDto; // استخدمنا الاسم الجديد
+
+import com.project._5.Friend_Finder.dto.UserResponseDto;
 import com.project._5.Friend_Finder.entity.User;
+import com.project._5.Friend_Finder.repository.FriendshipRepository;
 import com.project._5.Friend_Finder.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -13,6 +15,7 @@ import java.util.stream.Collectors;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final FriendshipRepository friendshipRepository;
 
     // method for calling all users and convert them to DTO
     public List<UserResponseDto> getAllUsers() {
@@ -26,14 +29,19 @@ public class UserService {
                 ))
                 .collect(Collectors.toList());
     }
+
     // this for suggested friends function --->
     public List<UserResponseDto> getSuggestedUsers(String currentUserEmail) {
-        // calling the first 5 users from database (without the current user ofc!)
+        User currentUser = userRepository.findByEmail(currentUserEmail)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
         List<User> suggestedUsers = userRepository.findTop5ByEmailNot(currentUserEmail);
 
-        // we transfer them into safe DTOs
         return suggestedUsers.stream()
-                .map(user -> new UserResponseDto(user.getId(), user.getFullName(), user.getEmail()))
+                .map(user -> {
+                    boolean isSent = friendshipRepository.findBySenderAndReceiver(currentUser, user).isPresent();
+                    return new UserResponseDto(user.getId(), user.getFullName(), user.getEmail(), isSent);
+                })
                 .collect(Collectors.toList());
     }
 }

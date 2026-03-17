@@ -40,11 +40,17 @@ export class Home implements OnInit {
     this.loadSuggestedUsers();
   }
 
-  loadSuggestedUsers() {
+ loadSuggestedUsers() {
     this.userService.getSuggestedUsers().subscribe({
-      next: (res: any) => {
-        this.suggestedUsers = res;
-        this.cdr.detectChanges(); // السطر السحري عشان نعرضهم فوراً
+      next: (res: any[]) => {
+        // Map the backend property 'requestSent' to our frontend property 'isRequestSent'
+        this.suggestedUsers = res.map(user => {
+          user.isRequestSent = user.requestSent || false; 
+          return user;
+        });
+        
+        // Trigger UI update
+        this.cdr.detectChanges(); 
       },
       error: (err: any) => console.error('Error fetching suggested users:', err)
     });
@@ -172,5 +178,37 @@ createPost() {
     localStorage.removeItem('token');
     localStorage.removeItem('fullName');
     this.router.navigate(['/login']);
+  }
+
+// 3️⃣ دالة إرسال أو إلغاء طلب الصداقة (الواجهة المتفائلة)
+  toggleFriendRequest(user: any) {
+    if (user.isRequestSent) {
+      // ❌ لو الطلب مبعوت، يبقى اليوزر عاوز يلغيه
+      user.isRequestSent = false; // بنعدل الشاشة فوراً
+      this.cdr.detectChanges();
+      
+      this.userService.cancelFriendRequest(user.id).subscribe({
+        next: () => console.log('Request cancelled successfully'),
+        error: (err: any) => {
+          console.error('Error cancelling request', err);
+          user.isRequestSent = true; // لو حصل إيرور نرجع الزرار زي ما كان
+          this.cdr.detectChanges();
+        }
+      });
+      
+    } else {
+      // ✅ لو الطلب مش مبعوت، يبقى اليوزر عاوز يبعته
+      user.isRequestSent = true; 
+      this.cdr.detectChanges();
+
+      this.userService.sendFriendRequest(user.id).subscribe({
+        next: () => console.log('Request sent successfully'),
+        error: (err: any) => {
+          console.error('Error sending request:', err);
+          user.isRequestSent = false; 
+          this.cdr.detectChanges();
+        }
+      });
+    }
   }
 }

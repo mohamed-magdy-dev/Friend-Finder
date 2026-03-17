@@ -7,5 +7,5 @@ import lombok.Data;
 @AllArgsConstructor
 public class AuthResponse {
     private String token;
-    private String fullName; // بنرجعه عشان نعرضه في الفرونت
+    private String fullName;
 }

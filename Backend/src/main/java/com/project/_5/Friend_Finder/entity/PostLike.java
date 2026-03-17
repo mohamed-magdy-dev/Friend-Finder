@@ -23,12 +23,12 @@ public class PostLike {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    // اللايك محطوط على أنهي بوست
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id", nullable = false)
     private Post post;
 
-    // مين اليوزر اللي عمل اللايك
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;

@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class PostResponseDto { // ده اللي الباك إند هيبعته للفرونت عشان يعرضه في الصفحة الرئيسية
+public class PostResponseDto {
     private Long id;
     private String content;
     private String mediaUrl;

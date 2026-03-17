@@ -32,29 +32,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
 
-        // 1. بندور على التوكن في الـ Header بتاع الـ Request
         final String authHeader = request.getHeader("Authorization");
         final String jwt;
         final String userEmail;
 
-        // لو مفيش توكن أو مش بيبدأ بكلمة Bearer، عدي الطلب (ومش هيدخل طبعاً لأن السكيورتي هيوقفه بعدين)
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        // 2. بنطلع التوكن الصافي (بنشيل كلمة Bearer والمسافة)
         jwt = authHeader.substring(7);
-        // بنطلع الإيميل من التوكن
         userEmail = jwtUtils.extractUsername(jwt);
 
-        // 3. لو الإيميل موجود واليوزر مش معمولة Login أصلاً
         if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
 
-            // 4. نتأكد إن التوكن سليم
             if (jwtUtils.validateToken(jwt, userDetails)) {
-                // نسجله في النظام إنه "دخل خلاص"
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         userDetails,
                         null,
@@ -64,7 +57,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
         }
-        // كمل يا ريس
         filterChain.doFilter(request, response);
     }
 }

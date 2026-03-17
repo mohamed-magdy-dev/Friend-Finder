@@ -174,7 +174,13 @@
                   <p class="ff-suggest-meta">Suggested for you</p>
                 </div>
                 
-                <button class="ff-btn-add ms-auto">+ Add</button>
+                          <button class="ff-btn-add ms-auto" 
+                    (click)="toggleFriendRequest(user)" 
+                    [style.background]="user.isRequestSent ? 'var(--ff-clr-page)' : ''"
+                    [style.color]="user.isRequestSent ? 'var(--ff-clr-ink-2)' : ''"
+                    [style.borderColor]="user.isRequestSent ? 'var(--ff-clr-border)' : ''">
+              {{ user.isRequestSent ? 'Cancel' : '+ Add' }}
+            </button>
               </div>
             }
 

@@ -18,12 +18,11 @@ public class Post {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // نص البوست (Oracle compatible)
+
     @Lob // new annotation and it is for long posts
     @Column (name = "content") //(nullable = false)
     private String content;
 
-    // لينك صورة أو فيديو (اختياري)
     private String mediaUrl;
     private String mediaType; // "TEXT" or "IMAGE"or "VIDEO"
     @Column(nullable = false, updatable = false)

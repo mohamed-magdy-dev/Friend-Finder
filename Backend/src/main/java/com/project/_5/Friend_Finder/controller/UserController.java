@@ -10,7 +10,7 @@ import java.security.Principal;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/users") // ده العنوان الجديد
+@RequestMapping("/api/users")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*") // عشان الفرونت ميضربش CORS
 public class UserController {

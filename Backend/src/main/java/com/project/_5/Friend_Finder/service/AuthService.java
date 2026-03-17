@@ -53,20 +53,15 @@ public class AuthService {
 
     // login method
     public AuthResponse login(LoginRequest request) {
-        // request.getEmail() هنا ممكن يكون إيميل أو اسم يوزر، مش هتفرق الاسم إيه
         String input = request.getEmail();
 
-        //  دور في الداتا بيز (إيميل أو اسم)
         User user = userRepository.findByEmailOrFullName(input)
                 .orElseThrow(() -> new RuntimeException("login information are incorrect"));
 
-        //  اتأكد من الباسورد يدوياً (لأن لفيت لفة كده)
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new RuntimeException("Password Incorrect");
         }
-
-        // 3. لو تمام، طلع التوكن
-        String token = jwtUtils.generateToken(user.getEmail()); // التوكن لسه شايل الإيميل كـ Unique ID
+        String token = jwtUtils.generateToken(user.getEmail());
         return new AuthResponse(token, user.getFullName());
     }
 }

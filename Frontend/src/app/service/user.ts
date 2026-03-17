@@ -7,32 +7,34 @@ import { Observable } from 'rxjs';
 })
 export class UserService {
   
-  // رابط الباك إند اللي عملناه
   private apiUrl = 'http://localhost:8080/api/users';
+  private friendsApiUrl = 'http://localhost:8080/api/friends'; 
 
   constructor(private http: HttpClient) { }
 
   getAllUsers(): Observable<any[]> {
-    // 1. بنجيب التوكن من جيبنا (LocalStorage)
     const token = localStorage.getItem('token');
-
-    // 2. بنحطه في الهيدر عشان السكيورتي يدخلنا
-    const headers = new HttpHeaders({
-      'Authorization': `Bearer ${token}`
-    });
-
-    // 3. بنبعت الطلب (GET) ومعاه التوكن
+    const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
     return this.http.get<any[]>(this.apiUrl, { headers });
   }
 
   getSuggestedUsers(): Observable<any[]> {
     const token = localStorage.getItem('token');
-    const headers = new HttpHeaders({
-      'Authorization': `Bearer ${token}`
-    });
-    // بتنادي على الـ Endpoint الجديد اللي عملناه في الباك إند
+    const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
     return this.http.get<any[]>(`${this.apiUrl}/suggestions`, { headers });
   }
 
-  
+  sendFriendRequest(receiverId: number): Observable<any> {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
+    
+    return this.http.post(`${this.friendsApiUrl}/add/${receiverId}`, {}, { headers, responseType: 'text' as 'json' });
+  }
+  cancelFriendRequest(receiverId: number): Observable<any> {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
+    
+    // بنستخدم http.delete عشان إحنا عاملينها DeleteMapping في الباك إند
+    return this.http.delete(`${this.friendsApiUrl}/cancel/${receiverId}`, { headers, responseType: 'text' as 'json' });
+  }
 }
