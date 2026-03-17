@@ -13,13 +13,11 @@ import java.util.Map;
 public class PostLikesController {
     private final PostLikesService postLikesService;
 
-    // بنعمل Endpoint بياخد رقم البوست في اللينك
     @PostMapping("/{postId}/like")
     public ResponseEntity<?> toggleLike(@PathVariable Long postId, Principal principal) {
-        // بنبعت رقم البوست وإيميل اليوزر للسيرفس
+
         String result = postLikesService.toggleLike(postId, principal.getName());
 
-        // بنرجع JSON بسيط للفرونت إند فيه النتيجة (Liked أو Unliked)
         return ResponseEntity.ok(Map.of("message", result));
     }
 }

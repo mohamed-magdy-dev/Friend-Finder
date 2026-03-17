@@ -19,15 +19,14 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        // 1. بندور ع اليوزر بالإيميل
+
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
 
-        // 2. بنحوله للشكل اللي سبرينج سكيورتي بيفهمه (org.springframework.security.core.userdetails.User)
         return new org.springframework.security.core.userdetails.User(
                 user.getEmail(),
                 user.getPassword(),
-                // هنا بنحول الرول بتاعنا لصلاحية سبرينج يفهمها
+
                 List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole()))
         );
     }

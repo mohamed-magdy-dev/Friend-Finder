@@ -38,25 +38,25 @@ public class CommentsService {
         comment.setPost(post);
         comment.setUser(user);
 
-        // بنحفظه في الداتا بيز
+
         Comment savedComment = commentsRepository.save(comment);
 
-        // بنغلفه في العلبة ونرجعه عشان الأنجولار يعرضه فوراً
+
         return mapToDto(savedComment);
     }
 
-    // 2️⃣ دالة جلب تعليقات بوست معين
+
     public List<CommentsResponseDto> getCommentsByPostId(Long postId) {
-        // بنروح للمخزن ونقوله هات تعليقات البوست ده مترتبة من الأقدم للأحدث
+
         List<Comment> comments = commentsRepository.findByPostIdOrderByCreatedAtAsc(postId);
 
-        // بنحول لستة الـ Entities للستة DTOs عشان نبعتها نظيفة للفرونت إند
+
         return comments.stream()
                 .map(this::mapToDto)
                 .collect(Collectors.toList());
     }
 
-    // 3️⃣ دالة التحويل (اللي بتعبي العلبة)
+
     private CommentsResponseDto mapToDto(Comment comment) {
         return new CommentsResponseDto(
                 comment.getId(),

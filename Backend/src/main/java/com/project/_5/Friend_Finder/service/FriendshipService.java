@@ -1,5 +1,6 @@
 package com.project._5.Friend_Finder.service;
 
+import com.project._5.Friend_Finder.dto.FriendRequestsDto;
 import com.project._5.Friend_Finder.entity.Friendship;
 import com.project._5.Friend_Finder.entity.Notification;
 import com.project._5.Friend_Finder.entity.User;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -84,5 +86,74 @@ public class FriendshipService {
         notificationRepository.deleteAll(notifications);
 
         return "Friend request cancelled successfully!";
+    }
+    /**
+     * Accepts a pending friend request and creates a notification for the sender.
+     */
+    public String acceptFriendRequest(Long requestId, String receiverEmail) {
+        User receiver = userRepository.findByEmail(receiverEmail)
+                .orElseThrow(() -> new RuntimeException("Receiver not found"));
+
+        Friendship friendship = friendshipRepository.findById(requestId)
+                .orElseThrow(() -> new RuntimeException("Friend request not found"));
+
+        // Security check: Ensure the current user is the actual receiver of the request
+        if (!friendship.getReceiver().getId().equals(receiver.getId())) {
+            throw new RuntimeException("Unauthorized action");
+        }
+
+        // Update status to accepted
+        friendship.setStatus("ACCEPTED");
+        friendshipRepository.save(friendship);
+
+        // Notify the sender that their request was accepted
+        Notification notification = new Notification();
+        notification.setUser(friendship.getSender());
+        notification.setMessage(receiver.getFullName() + " accepted your friend request.");
+        notificationRepository.save(notification);
+
+        return "Friend request accepted successfully!";
+    }
+
+    /**
+     * Rejects (deletes) a pending friend request.
+     */
+    public String rejectFriendRequest(Long requestId, String receiverEmail) {
+        User receiver = userRepository.findByEmail(receiverEmail)
+                .orElseThrow(() -> new RuntimeException("Receiver not found"));
+
+        Friendship friendship = friendshipRepository.findById(requestId)
+                .orElseThrow(() -> new RuntimeException("Friend request not found"));
+
+        // Security check: Ensure the current user is the actual receiver
+        if (!friendship.getReceiver().getId().equals(receiver.getId())) {
+            throw new RuntimeException("Unauthorized action");
+        }
+
+        // Delete the request entirely
+        friendshipRepository.delete(friendship);
+
+        return "Friend request rejected successfully!";
+    }
+
+    /**
+     * Retrieves a list of pending friend requests for the current logged-in user.
+     */
+    public List<FriendRequestsDto> getPendingRequests(String receiverEmail) {
+        User receiver = userRepository.findByEmail(receiverEmail)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Fetch pending requests from the database
+        List<Friendship> pendingRequests = friendshipRepository.findByReceiverAndStatus(receiver, "PENDING");
+
+        // Map the entities to DTOs
+        return pendingRequests.stream()
+                .map(request -> new FriendRequestsDto(
+                        request.getId(),
+                        request.getSender().getId(),
+                        request.getSender().getFullName(),
+                        request.getSender().getEmail()
+                ))
+                .collect(Collectors.toList());
     }
 }

@@ -13,15 +13,14 @@ import java.security.Principal;
 @RestController
 @RequestMapping("/api/posts")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*") // عشان الفرونت إند
+@CrossOrigin(origins = "*") // cors for frontend
 public class PostController {
 
     private final PostService postService;
 
-    // 1. إنشاء بوست جديد
     @PostMapping
     public ResponseEntity<PostResponseDto> createPost(@RequestBody PostRequestDto request, Principal principal) {
-        // principal.getName() هنا بترجع "الإيميل" اللي متخزن في SecurityContextHolder
+
         String userEmail = principal.getName();
         return ResponseEntity.ok(postService.createPost(request, userEmail));
     }

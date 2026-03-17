@@ -23,12 +23,12 @@ public class Friendship {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    // اللي بعت طلب الصداقة
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sender_id", nullable = false)
     private User sender;
 
-    // اللي استقبل طلب الصداقة
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "receiver_id", nullable = false)
     private User receiver;

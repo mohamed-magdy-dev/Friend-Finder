@@ -22,12 +22,10 @@ public class JwtUtils {
     @Value("${token.time}")
     private Long jwtExpiration;
 
-    // 1. استخراج الإيميل من التوكن
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }
 
-    // 2. استخراج تاريخ الانتهاء
     public Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
     }
@@ -45,7 +43,6 @@ public class JwtUtils {
         return extractExpiration(token).before(new Date());
     }
 
-    // 3. إنشاء توكن جديد (Generate Token)
     public String generateToken(String email) {
         return Jwts.builder()
                 .setSubject(email)
@@ -55,7 +52,6 @@ public class JwtUtils {
                 .compact();
     }
 
-    // 4. التأكد إن التوكن سليم
     public Boolean validateToken(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
