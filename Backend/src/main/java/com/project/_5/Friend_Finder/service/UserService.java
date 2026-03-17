@@ -1,6 +1,7 @@
 package com.project._5.Friend_Finder.service;
 
 import com.project._5.Friend_Finder.dto.UserResponseDto;
+import com.project._5.Friend_Finder.entity.Friendship;
 import com.project._5.Friend_Finder.entity.User;
 import com.project._5.Friend_Finder.repository.FriendshipRepository;
 import com.project._5.Friend_Finder.repository.UserRepository;
@@ -8,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,11 +37,25 @@ public class UserService {
         User currentUser = userRepository.findByEmail(currentUserEmail)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        List<User> suggestedUsers = userRepository.findTop5ByEmailNot(currentUserEmail);
+        List<User> allUsers = userRepository.findTop5ByEmailNot(currentUserEmail);
 
-        return suggestedUsers.stream()
+        return allUsers.stream()
+                .filter(user -> {
+                    // Check if there is already an ACCEPTED friendship in either direction
+                    Optional<Friendship> sentRequest = friendshipRepository.findBySenderAndReceiver(currentUser, user);
+                    Optional<Friendship> receivedRequest = friendshipRepository.findBySenderAndReceiver(user, currentUser);
+
+                    boolean isAlreadyFriend = (sentRequest.isPresent() && "ACCEPTED".equals(sentRequest.get().getStatus())) ||
+                            (receivedRequest.isPresent() && "ACCEPTED".equals(receivedRequest.get().getStatus()));
+
+                    // Only keep the user in the suggestion list if they are NOT already friends
+                    return !isAlreadyFriend;
+                })
                 .map(user -> {
-                    boolean isSent = friendshipRepository.findBySenderAndReceiver(currentUser, user).isPresent();
+                    // Check if the current user has a PENDING request sent to this user
+                    Optional<Friendship> sentRequest = friendshipRepository.findBySenderAndReceiver(currentUser, user);
+                    boolean isSent = sentRequest.isPresent() && "PENDING".equals(sentRequest.get().getStatus());
+
                     return new UserResponseDto(user.getId(), user.getFullName(), user.getEmail(), isSent);
                 })
                 .collect(Collectors.toList());

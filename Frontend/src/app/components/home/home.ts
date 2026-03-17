@@ -22,6 +22,7 @@ export class Home implements OnInit {
   newPostContent: string = ''; 
   isPosting: boolean = false;
   suggestedUsers: any[] = [];
+  pendingRequests: any[] = [];
   constructor(
     private router: Router,
     private postService: PostService,
@@ -38,6 +39,7 @@ export class Home implements OnInit {
   ngOnInit() {
     this.loadPosts();
     this.loadSuggestedUsers();
+    this.loadPendingRequests();
   }
 
  loadSuggestedUsers() {
@@ -210,5 +212,57 @@ createPost() {
         }
       });
     }
+  }
+
+
+  /**
+   * Loads all pending friend requests from the backend.
+   */
+  loadPendingRequests() {
+    this.userService.getPendingFriendRequests().subscribe({
+      next: (res: any[]) => {
+        this.pendingRequests = res;
+        this.cdr.detectChanges(); // Update the UI
+      },
+      error: (err: any) => console.error('Error fetching pending requests:', err)
+    });
+  }
+
+  /**
+   * Accepts a friend request and removes it from the UI instantly.
+   */
+  acceptRequest(requestId: number) {
+    // Optimistic UI update: Remove the request from the array immediately
+    this.pendingRequests = this.pendingRequests.filter(req => req.requestId !== requestId);
+    this.cdr.detectChanges();
+
+    // Send the actual request to the backend
+    this.userService.acceptFriendRequest(requestId).subscribe({
+      next: () => console.log('Friend request accepted successfully'),
+      error: (err: any) => {
+        console.error('Error accepting friend request:', err);
+        // If it fails, reload the list to restore the removed request
+        this.loadPendingRequests();
+      }
+    });
+  }
+
+  /**
+   * Rejects a friend request and removes it from the UI instantly.
+   */
+  rejectRequest(requestId: number) {
+    // Optimistic UI update: Remove the request from the array immediately
+    this.pendingRequests = this.pendingRequests.filter(req => req.requestId !== requestId);
+    this.cdr.detectChanges();
+
+    // Send the actual request to the backend
+    this.userService.rejectFriendRequest(requestId).subscribe({
+      next: () => console.log('Friend request rejected successfully'),
+      error: (err: any) => {
+        console.error('Error rejecting friend request:', err);
+        // If it fails, reload the list to restore the removed request
+        this.loadPendingRequests();
+      }
+    });
   }
 }

@@ -12,4 +12,7 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
 
     // this for notification, based on the user ofc and its message.
     List<Notification> findByUserAndMessage(User user, String message);
+
+    // Fetches notifications for a specific user, ordered from newest to oldest
+    List<Notification> findByUserOrderByCreatedAtDesc(User user);
 }

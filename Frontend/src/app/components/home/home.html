@@ -156,7 +156,47 @@
 
       </main>
 
+
+
       <aside class="col-lg-3 col-xl-3 ff-sidebar-right">
+        @if (pendingRequests.length > 0) {
+        <div class="ff-card p-3 mb-3 ff-anim ff-d1">
+          <p class="ff-widget-label">
+            <i class="bi bi-bell-fill me-1 text-warning"></i> Friend Requests 
+            <span class="badge bg-danger rounded-pill ms-1">{{ pendingRequests.length }}</span>
+          </p>
+          <div class="d-flex flex-column gap-3">
+            
+            @for (req of pendingRequests; track req.requestId) {
+              <div class="d-flex align-items-center gap-2 ff-suggest-item">
+                <div class="ff-post-avatar" 
+                     [style.background]="'hsl(' + ((req.senderName.charCodeAt(0) || 65) * 137 % 360) + ',70%,52%)'"
+                     style="width:36px;height:36px;font-size:.85rem;">
+                  {{ req.senderName.charAt(0).toUpperCase() }}
+                </div>
+                
+                <div style="flex: 1; min-width: 0;">
+                  <p class="ff-suggest-name text-truncate mb-0" title="{{ req.senderName }}">{{ req.senderName }}</p>
+                </div>
+                
+                <div class="d-flex gap-1">
+                  <button class="btn btn-sm btn-primary" 
+                          style="padding: 0.2rem 0.5rem; font-size: 0.8rem; border-radius: 50px;" 
+                          (click)="acceptRequest(req.requestId)">
+                    Accept
+                  </button>
+                  <button class="btn btn-sm btn-light text-danger border" 
+                          style="padding: 0.2rem 0.5rem; font-size: 0.8rem; border-radius: 50px;" 
+                          (click)="rejectRequest(req.requestId)">
+                    Decline
+                  </button>
+                </div>
+              </div>
+            }
+
+          </div>
+        </div>
+      }
         <div class="ff-card p-3 mb-3 ff-anim ff-d1">
           <p class="ff-widget-label"><i class="bi bi-person-plus-fill me-1"></i> Who to Follow</p>
           <div class="d-flex flex-column gap-3">
