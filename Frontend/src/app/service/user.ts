@@ -69,4 +69,28 @@ export class UserService {
     // Using DELETE because we defined it as @DeleteMapping in Spring Boot
     return this.http.delete(`${this.friendsApiUrl}/reject/${requestId}`, { headers, responseType: 'text' as 'json' });
   }
+
+  // Fetches the user profile and friendship status
+  getUserProfile(userId: number): Observable<any> {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
+    
+    return this.http.get<any>(`${this.apiUrl}/profile/${userId}`, { headers });
+  }
+
+  // Search for users by name
+  searchUsers(name: string): Observable<any[]> {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
+    return this.http.get<any[]>(`${this.apiUrl}/search?name=${name}`, { headers });
+  }
+
+
+  // Fetches full search results with pagination
+  getFullSearchResults(name: string, page: number = 0, size: number = 10): Observable<any> {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
+    return this.http.get<any>(`${this.apiUrl}/search/full?name=${name}&page=${page}&size=${size}`, { headers });
+  }
+  
 }

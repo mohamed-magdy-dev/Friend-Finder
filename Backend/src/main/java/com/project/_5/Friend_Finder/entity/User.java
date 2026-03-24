@@ -29,5 +29,6 @@ public class User {
 
     private String bio;
     private String profilePictureUrl;
+    private String coverPictureUrl;
     private java.time.LocalDate birthDate;
 }

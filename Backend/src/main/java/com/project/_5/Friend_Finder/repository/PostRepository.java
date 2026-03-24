@@ -1,6 +1,7 @@
 package com.project._5.Friend_Finder.repository;
 
 import com.project._5.Friend_Finder.entity.Post;
+import com.project._5.Friend_Finder.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,4 +13,8 @@ import java.util.List;
 public interface PostRepository extends JpaRepository<Post, Long> {
 
     Page<Post> findAllByOrderByCreatedAtDesc(Pageable pageable);
+
+    // Fetches posts authored by a specific user, ordered by newest first
+    Page<Post> findByUserOrderByCreatedAtDesc(User author, Pageable pageable);
+
 }

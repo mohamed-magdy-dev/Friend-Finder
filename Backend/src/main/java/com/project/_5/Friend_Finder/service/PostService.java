@@ -66,10 +66,29 @@ public class PostService {
                 post.getMediaUrl(),
                 post.getMediaType(),
                 post.getCreatedAt(),
+                post.getUser().getId(),
                 post.getUser().getFullName(),
                 post.getUser().getEmail(),
                 likeCount, // added counts (for like)
                 isLiked    // added this
         );
+    }
+
+    /**
+     * Retrieves a paginated list of posts authored by a specific user.
+     */
+    public Page<PostResponseDto> getUserPosts(Long userId, int page, int size, String currentUserEmail) {
+
+        User targetUser = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Target user not found"));
+
+        User currentUser = userRepository.findByEmail(currentUserEmail)
+                .orElseThrow(() -> new RuntimeException("Current user not found"));
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<Post> userPosts = postRepository.findByUserOrderByCreatedAtDesc(targetUser, pageable);
+
+        return userPosts.map(post -> mapToDto(post, currentUser));
     }
 }

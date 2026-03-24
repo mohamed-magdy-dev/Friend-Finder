@@ -1,6 +1,8 @@
 package com.project._5.Friend_Finder.repository;
 
 import com.project._5.Friend_Finder.entity.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -21,4 +23,14 @@ public interface UserRepository extends JpaRepository<User, Long> {
     // note the name is like that since spring translates this into sql query
     // findTop5ByEmailNot = spring dataJpa translates it and understands it.
     List<User> findTop5ByEmailNot(String email);
+
+    // Search users by name (ignores uppercase/lowercase)
+    // List<User> findByFullNameContainingIgnoreCase(String fullName);
+    // why did i comment the  first one?
+    // debugging and limiting the search to only 10 users
+    // Limit search to Top 10 users to prevent UI crashing .. only adding Top10
+    List<User> findTop10ByFullNameContainingIgnoreCase(String fullName);
+
+    // Full search with Pagination
+    Page<User> findByFullNameContainingIgnoreCase(String fullName, Pageable pageable);
 }

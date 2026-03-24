@@ -6,10 +6,11 @@ import { FormsModule } from '@angular/forms';
 import { CommentsService } from '../../service/comments';
 import { UserService } from '../../service/user';
 import { NotificationService } from '../../service/notification';
+import { RouterLink } from '@angular/router';
 @Component({
   selector: 'app-home', 
   standalone: true,     
-  imports: [CommonModule, FormsModule], 
+  imports: [CommonModule, FormsModule, RouterLink], 
   templateUrl: './home.html', 
   styleUrl: './home.css'     
 })
@@ -28,13 +29,21 @@ export class Home implements OnInit {
   unreadNotificationsCount: number = 0;
  isNotificationOpen: boolean = false;
   isFriendRequestOpen: boolean = false; // for angular vs bootstrap thing
+  // Search variables
+  searchQuery: string = '';
+  searchResults: any[] = [];
+  isSearchDropdownOpen: boolean = false;
+  // profile dropdown thingy
+  isProfileMenuOpen: boolean = false;
+currentUserId: number = 1;
   constructor(
     private router: Router,
     private postService: PostService,
     private cdr: ChangeDetectorRef, 
     private commentsService: CommentsService,
     private userService: UserService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    
   ) {
     const storedName = localStorage.getItem('fullName');
     if (storedName) {
@@ -297,5 +306,37 @@ createPost() {
     this.notificationService.markAsRead(notification.id).subscribe({
       error: (err: any) => console.error('Error marking notification as read:', err)
     });
+  }
+
+  // Triggered when user types in the search bar
+  onSearch() {
+    if (!this.searchQuery.trim()) {
+      this.searchResults = [];
+      this.isSearchDropdownOpen = false;
+      return;
+    }
+    this.userService.searchUsers(this.searchQuery).subscribe({
+      next: (res: any[]) => {
+        this.searchResults = res;
+        this.isSearchDropdownOpen = true;
+        this.cdr.detectChanges();
+      },
+      error: (err: any) => console.error('Error searching users:', err)
+    });
+  }
+    // Triggered when the user presses Enter in the search bar
+       onSearchEnter() {
+        if (this.searchQuery.trim()) {
+        this.isSearchDropdownOpen = false;
+        this.router.navigate(['/search', this.searchQuery.trim()]);
+      }
+    }   
+  // Closes the dropdown (used when clicking outside or losing focus)
+  closeSearch() {
+    // Timeout allows the click event on the link to fire before hiding the dropdown
+    setTimeout(() => {
+      this.isSearchDropdownOpen = false;
+      this.cdr.detectChanges();
+    }, 200);
   }
 }

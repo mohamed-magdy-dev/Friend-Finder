@@ -38,4 +38,12 @@ export class PostService {
     // اتأكد إن اللينك ده نفس اللي إنت عامله في الـ Backend
     return this.http.post<any>(`${this.apiUrl}/${postId}/like`, {}, { headers });
   }
+
+  // Fetches posts authored by a specific user only
+  getUserPosts(userId: number, page: number = 0, size: number = 10): Observable<any> {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
+    
+    return this.http.get<any>(`${this.apiUrl}/user/${userId}?page=${page}&size=${size}`, { headers });
+  }
 }

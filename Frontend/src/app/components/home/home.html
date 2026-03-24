@@ -4,56 +4,46 @@
     <div class="container-xl d-flex align-items-center gap-3 w-100">
       <a class="ff-brand me-2">Friend Finder</a>
       
-      <div class="ff-search-wrap d-none d-md-block">
+      <div class="ff-search-wrap d-none d-md-block position-relative">
         <i class="bi bi-search ff-search-icon"></i>
-        <input class="ff-search" type="search" placeholder="Search people, posts…" />
+       <input class="ff-search" type="search" placeholder="Search people..." 
+               [(ngModel)]="searchQuery" 
+               (keyup)="onSearch()" 
+               (keyup.enter)="onSearchEnter()" 
+               (blur)="closeSearch()" />
+               
+        @if (isSearchDropdownOpen && searchResults.length > 0) {
+          <div class="dropdown-menu show shadow position-absolute mt-1 w-100 p-2" style="z-index: 1050; border-radius: 8px;">
+            @for (user of searchResults; track user.id) {
+              <a class="dropdown-item d-flex align-items-center gap-2 p-2 rounded ff-anim" 
+                 [routerLink]="['/profile', user.id]" style="cursor: pointer;">
+                <div class="ff-post-avatar text-white d-flex align-items-center justify-content-center fw-bold" 
+                     [style.background]="'hsl(' + ((user.fullName.charCodeAt(0) || 65) * 137 % 360) + ',70%,52%)'"
+                     style="width:32px; height:32px; font-size:.8rem;">
+                  {{ user.fullName.charAt(0).toUpperCase() }}
+                </div>
+                <span class="fw-bold text-dark" style="font-size: 0.9rem;">{{ user.fullName }}</span>
+              </a>
+            }
+          </div>
+        } @else if (isSearchDropdownOpen && searchQuery.trim() !== '' && searchResults.length === 0) {
+          <div class="dropdown-menu show shadow position-absolute mt-1 w-100 p-3 text-center text-muted" style="z-index: 1050; border-radius: 8px;">
+            No users found.
+          </div>
+        }
       </div>
       
       <div class="ms-auto d-flex align-items-center gap-3">
         
-        <div class="position-relative">
-          <button class="btn btn-link text-dark position-relative p-1 border-0" 
-                  (click)="toggleFriendRequests()" style="background: transparent;">
-            <i class="bi bi-people-fill fs-4"></i>
-            @if (pendingRequests.length > 0) {
-              <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" 
-                    style="font-size: 0.65rem; transform: translate(-30%, 10%) !important;">
-                {{ pendingRequests.length }}
-              </span>
-            }
-          </button>
-
-          @if (isFriendRequestOpen) {
-            <div class="dropdown-menu show shadow position-absolute mt-2 p-0" 
-                 style="right: 0; left: auto; width: 320px; max-height: 400px; overflow-y: auto; z-index: 1050; border-radius: 10px;">
-              <div class="dropdown-header d-flex justify-content-between align-items-center p-3 border-bottom">
-                <h6 class="mb-0 fw-bold text-dark">Friend Requests</h6>
-              </div>
-              
-              <div class="p-2">
-                @if (pendingRequests.length === 0) {
-                  <p class="text-center text-muted small p-3 mb-0">No new requests.</p>
-                }
-                @for (req of pendingRequests; track req.requestId) {
-                  <div class="d-flex align-items-center gap-2 p-2 border-bottom">
-                    <div class="ff-post-avatar" 
-                         [style.background]="'hsl(' + ((req.senderName.charCodeAt(0) || 65) * 137 % 360) + ',70%,52%)'"
-                         style="width:40px;height:40px;font-size:1rem;">
-                      {{ req.senderName.charAt(0).toUpperCase() }}
-                    </div>
-                    <div style="flex: 1; min-width: 0;">
-                      <p class="fw-bold mb-0 text-truncate" style="font-size: 0.9rem;">{{ req.senderName }}</p>
-                      <div class="d-flex gap-2 mt-1">
-                        <button class="btn btn-primary flex-grow-1" style="font-size: 0.8rem; padding: 0.2rem;" (click)="acceptRequest(req.requestId)">Confirm</button>
-                        <button class="btn btn-light border flex-grow-1" style="font-size: 0.8rem; padding: 0.2rem;" (click)="rejectRequest(req.requestId)">Delete</button>
-                      </div>
-                    </div>
-                  </div>
-                }
-              </div>
-            </div>
+        <a routerLink="/friend-requests" class="btn btn-link text-dark position-relative p-1 border-0" style="background: transparent;">
+          <i class="bi bi-people-fill fs-4"></i>
+          @if (pendingRequests.length > 0) {
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" 
+                  style="font-size: 0.65rem; transform: translate(-30%, 10%) !important;">
+              {{ pendingRequests.length }}
+            </span>
           }
-        </div>
+        </a>
 
         <div class="position-relative">
           <button class="btn btn-link text-dark position-relative p-1 border-0" 
@@ -102,11 +92,33 @@
           }
         </div>
 
-        <span class="d-none d-sm-block ms-2" style="font-size:.82rem; color:var(--ff-clr-ink-2);">
-          Hey, <strong style="color:var(--ff-clr-ink); font-weight:700;">{{ userName }}</strong>
-        </span>
-        <div class="ff-nav-avatar">{{ userName.charAt(0).toUpperCase() }}</div>
-        <button class="ff-btn-signout d-none d-sm-block" (click)="logout()">Sign out</button>
+        <div class="position-relative ms-2">
+          <div class="d-flex align-items-center gap-2 ff-anim" 
+               style="cursor: pointer; padding: 4px 8px; border-radius: 50px;" 
+               [ngClass]="{'bg-light': isProfileMenuOpen}"
+               (click)="isProfileMenuOpen = !isProfileMenuOpen">
+            <span class="d-none d-sm-block" style="font-size:.82rem; color:var(--ff-clr-ink-2);">
+              Hey, <strong style="color:var(--ff-clr-ink); font-weight:700;">{{ userName }}</strong>
+            </span>
+            <div class="ff-nav-avatar">{{ userName.charAt(0).toUpperCase() }}</div>
+          </div>
+
+          @if (isProfileMenuOpen) {
+            <div class="dropdown-menu show shadow position-absolute mt-2 p-2" 
+                 style="right: 0; left: auto; width: 200px; z-index: 1050; border-radius: 10px;">
+              <a class="dropdown-item rounded py-2 ff-anim" [routerLink]="['/profile', currentUserId]" style="cursor: pointer;">
+                <i class="bi bi-person-circle me-2 text-primary"></i> My Profile
+              </a>
+              <a class="dropdown-item rounded py-2 ff-anim" style="cursor: pointer;">
+                <i class="bi bi-gear-fill me-2 text-secondary"></i> Settings
+              </a>
+              <hr class="dropdown-divider">
+              <a class="dropdown-item rounded py-2 text-danger ff-anim" (click)="logout()" style="cursor: pointer;">
+                <i class="bi bi-box-arrow-right me-2"></i> Sign out
+              </a>
+            </div>
+          }
+        </div>
         
       </div>
     </div>
@@ -135,8 +147,8 @@
 
         <div class="ff-card p-2 ff-anim ff-d1">
           <nav class="d-flex flex-column gap-1">
-            <a class="ff-nav-link active"><span class="ff-nav-icon"><i class="bi bi-house-door-fill"></i></span> Home</a>
-            <a class="ff-nav-link"><span class="ff-nav-icon"><i class="bi bi-people-fill"></i></span> Friends</a>
+            <a class="ff-nav-link active" routerLink="/home"><span class="ff-nav-icon"><i class="bi bi-house-door-fill"></i></span> Home</a>
+            <a class="ff-nav-link" routerLink="/friend-requests"><span class="ff-nav-icon"><i class="bi bi-people-fill"></i></span> Friends</a>
             <a class="ff-nav-link"><span class="ff-nav-icon"><i class="bi bi-clock-history"></i></span> Timeline</a>
             <a class="ff-nav-link"><span class="ff-nav-icon"><i class="bi bi-info-circle-fill"></i></span> About</a>
           </nav>
@@ -180,12 +192,19 @@
           <div class="ff-card ff-card-post p-3 mb-3 ff-anim" [class]="'ff-d' + (i < 5 ? i + 1 : 5)">
             
             <div class="d-flex align-items-center gap-3 mb-3">
-              <div class="ff-post-avatar" [style.background]="'hsl(' + ((post?.authorName?.charCodeAt(0) || 65) * 137 % 360) + ',55%,48%)'">
+            <div class="ff-post-avatar" 
+                   [routerLink]="['/profile', post.authorId]" 
+                   [style.background]="'hsl(' + (((post?.authorName?.charCodeAt(0) || 65) * 137) % 360) + ', 55%, 48%)'"
+                   style="cursor: pointer;">
                 {{ post?.authorName?.charAt(0)?.toUpperCase() || 'U' }}
               </div>
               <div class="flex-grow-1">
-                <p class="ff-post-author">{{ post?.authorName || 'Unknown User' }}</p>
-                <span class="ff-post-date">
+                <p class="ff-post-author text-decoration-none text-dark d-inline-block m-0" 
+                   [routerLink]="['/profile', post.authorId]" 
+                   style="cursor: pointer; font-weight: bold;">
+                   {{ post?.authorName || 'Unknown User' }}
+                </p>
+                <span class="ff-post-date d-block mt-1">
                   <i class="bi bi-clock me-1"></i> {{ post?.createdAt | date:'MMM d, y · h:mm a' }}
                 </span>
               </div>
@@ -249,7 +268,6 @@
       </main>
 
       <aside class="col-lg-3 col-xl-3 ff-sidebar-right">
-        
         <div class="ff-card p-3 mb-3 ff-anim ff-d1">
           <p class="ff-widget-label"><i class="bi bi-person-plus-fill me-1"></i> Who to Follow</p>
           <div class="d-flex flex-column gap-3">
@@ -257,14 +275,15 @@
             @for (user of suggestedUsers; track user.id) {
               <div class="d-flex align-items-center gap-2 ff-suggest-item">
                 <div class="ff-post-avatar" 
+                     [routerLink]="['/profile', user.id]"
                      [style.background]="'hsl(' + ((user.fullName.charCodeAt(0) || 65) * 137 % 360) + ',70%,52%)'"
-                     style="width:36px;height:36px;font-size:.85rem;">
+                     style="width:36px;height:36px;font-size:.85rem; cursor: pointer;">
                   {{ user.fullName.charAt(0).toUpperCase() }}
                 </div>
                 
-                <div>
-                  <p class="ff-suggest-name">{{ user.fullName }}</p>
-                  <p class="ff-suggest-meta">Suggested for you</p>
+                <div class="flex-grow-1" [routerLink]="['/profile', user.id]" style="cursor: pointer; min-width: 0;">
+                  <p class="ff-suggest-name text-truncate mb-0 fw-bold">{{ user.fullName }}</p>
+                  <p class="ff-suggest-meta text-truncate mb-0">Suggested for you</p>
                 </div>
                 
                 <button class="ff-btn-add ms-auto" 
@@ -283,7 +302,6 @@
 
           </div>
         </div>
-        
       </aside>
       
     </div>

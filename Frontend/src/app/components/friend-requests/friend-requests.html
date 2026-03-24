@@ -1,0 +1,42 @@
+<div class="ff-page-wrap">
+  
+  <nav class="ff-navbar d-flex align-items-center px-3 px-lg-4 mb-4 shadow-sm">
+    <div class="container-xl d-flex align-items-center gap-3 w-100">
+      <a routerLink="/home" class="ff-brand me-2 text-decoration-none text-dark" style="cursor: pointer;">
+        <i class="bi bi-arrow-left me-2"></i> Back to Home
+      </a>
+    </div>
+  </nav>
+
+  <div class="container-xl py-2 px-3 px-lg-4">
+    <h3 class="mb-4 fw-bold">Friend Requests</h3>
+
+    @if (pendingRequests.length > 0) {
+      <div class="row g-3">
+        @for (req of pendingRequests; track req.requestId) {
+          <div class="col-md-4 col-lg-3">
+            <div class="ff-card p-4 text-center h-100 shadow-sm border-0 ff-anim">
+              <div class="ff-avatar-lg mx-auto mb-3" 
+                   [style.background]="'hsl(' + ((req.senderName.charCodeAt(0) || 65) * 137 % 360) + ',70%,52%)'"
+                   style="width:80px; height:80px; font-size:2rem;">
+                {{ req.senderName.charAt(0).toUpperCase() }}
+              </div>
+              <h6 class="fw-bold mb-3 text-truncate">{{ req.senderName }}</h6>
+              <div class="d-flex gap-2 mt-auto">
+                <button class="btn btn-primary flex-grow-1" (click)="acceptRequest(req.requestId)">Confirm</button>
+                <button class="btn btn-light border flex-grow-1" (click)="rejectRequest(req.requestId)">Delete</button>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    } @else {
+      <div class="text-center py-5 bg-white rounded shadow-sm">
+        <i class="bi bi-inbox fs-1 text-muted mb-3 d-block"></i>
+        <h5 class="text-dark fw-bold">No New Requests</h5>
+        <p class="text-muted">You don't have any pending friend requests right now.</p>
+      </div>
+    }
+
+  </div>
+</div>

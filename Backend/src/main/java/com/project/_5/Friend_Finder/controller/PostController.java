@@ -33,4 +33,15 @@ public class PostController {
             Principal principal) {
         String userEmail = principal.getName();
         return ResponseEntity.ok(postService.getAllPosts(page, size, userEmail));    }
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<Page<PostResponseDto>> getUserPosts(
+            @PathVariable Long userId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            Principal principal) {
+
+        Page<PostResponseDto> posts = postService.getUserPosts(userId, page, size, principal.getName());
+        return ResponseEntity.ok(posts);
+    }
 }

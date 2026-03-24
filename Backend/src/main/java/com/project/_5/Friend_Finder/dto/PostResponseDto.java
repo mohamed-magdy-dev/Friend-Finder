@@ -17,6 +17,7 @@ public class PostResponseDto {
     private LocalDateTime createdAt;
 
     // post author information (صاحب البوست يعني)
+    private Long authorId; // added this for profile page
     private String authorName;
     private String authorEmail;
 
