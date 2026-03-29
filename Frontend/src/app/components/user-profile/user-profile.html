@@ -15,19 +15,46 @@
         @if (profileData) {
           <div class="ff-card mb-4 shadow-sm border-0 position-relative bg-white" style="border-radius: 12px; overflow: hidden;">
             
-             <!-- Static  -->
-            <!-- <div style="height: 220px; width: 100%;"
-                 [style.background]="profileData.coverPictureUrl ? 'url(' + profileData.coverPictureUrl + ') center/cover' : 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)'">
-            </div> --> 
-       
-            <div style="height: 220px; width: 100%; transition: all 0.3s ease;"
+            <div class="position-relative" style="height: 220px; width: 100%; transition: all 0.3s ease;"
                  [style.background]="profileData.coverPictureUrl ? 'url(' + profileData.coverPictureUrl + ') center/cover' : 'linear-gradient(135deg, hsl(' + ((profileData.id * 137) % 360) + ', 70%, 60%), hsl(' + ((profileData.id * 250) % 360) + ', 70%, 30%))'">
+                 
+                 <input type="file" #coverInput (change)="onCoverSelected($event)" accept="image/*" class="d-none">
+                 
+                 @if (profileData.friendshipStatus === 'SELF') {
+                   <button class="btn btn-dark btn-sm position-absolute top-0 end-0 m-3 shadow" 
+                           style="opacity: 0.8; border-radius: 8px;"
+                           (click)="coverInput.click()"
+                           [disabled]="isUploadingCover">
+                     @if (isUploadingCover) {
+                       <span class="spinner-border spinner-border-sm me-1" role="status"></span> Uploading...
+                     } @else {
+                       <i class="bi bi-camera-fill me-1"></i> Edit Cover
+                     }
+                   </button>
+                 }
             </div>
-            <div class="text-center" style="margin-top: -70px;">
-              <div class="mx-auto shadow-sm d-flex align-items-center justify-content-center text-white fw-bold" 
+            
+            <div class="text-center position-relative" style="margin-top: -70px; z-index: 2;">
+              <div class="mx-auto shadow-sm d-flex align-items-center justify-content-center text-white fw-bold position-relative ff-anim" 
                    [style.background]="profileData.profilePictureUrl ? 'url(' + profileData.profilePictureUrl + ') center/cover' : 'hsl(' + ((profileData.fullName.charCodeAt(0) || 65) * 137 % 360) + ',70%,52%)'"
-                   style="width: 140px; height: 140px; font-size: 3.5rem; border: 5px solid white; border-radius: 50%; position: relative; z-index: 2;">
+                   style="width: 140px; height: 140px; font-size: 3.5rem; border: 5px solid white; border-radius: 50%;">
+                
                 {{ !profileData.profilePictureUrl ? profileData.fullName.charAt(0).toUpperCase() : '' }}
+                
+                <input type="file" #profilePicInput (change)="onProfilePicSelected($event)" accept="image/*" class="d-none">
+
+                @if (profileData.friendshipStatus === 'SELF') {
+                  <button class="btn btn-secondary rounded-circle position-absolute bottom-0 end-0 shadow" 
+                          style="width: 36px; height: 36px; padding: 0; transform: translate(-10px, -10px);"
+                          (click)="profilePicInput.click()"
+                          [disabled]="isUploadingProfile">
+                    @if (isUploadingProfile) {
+                      <span class="spinner-border spinner-border-sm" role="status" style="width: 1rem; height: 1rem;"></span>
+                    } @else {
+                      <i class="bi bi-camera-fill"></i>
+                    }
+                  </button>
+                }
               </div>
             </div>
             
@@ -71,7 +98,7 @@
                 }
                 @if (profileData.friendshipStatus === 'SELF') {
                   <button class="btn btn-light border px-4 fw-bold" style="border-radius: 8px;">
-                    <i class="bi bi-pencil-fill me-1"></i> Edit Profile
+                    <i class="bi bi-pencil-fill me-1"></i> Edit Details
                   </button>
                 }
               </div>

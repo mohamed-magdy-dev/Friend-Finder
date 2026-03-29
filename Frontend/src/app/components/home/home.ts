@@ -35,7 +35,7 @@ export class Home implements OnInit {
   isSearchDropdownOpen: boolean = false;
   // profile dropdown thingy
   isProfileMenuOpen: boolean = false;
-currentUserId: number = 1;
+currentUserId: number = 0;
   constructor(
     private router: Router,
     private postService: PostService,
@@ -52,6 +52,7 @@ currentUserId: number = 1;
   }
 
   ngOnInit() {
+    this.currentUserId = Number(localStorage.getItem('userId')) || 0;
     this.loadPosts();
     this.loadSuggestedUsers();
     this.loadPendingRequests();

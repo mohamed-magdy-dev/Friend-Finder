@@ -12,6 +12,14 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+// photo upload imports (nio):
+import org.springframework.web.multipart.MultipartFile;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.UUID;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -128,5 +136,54 @@ public class UserService {
                 user.getFullName(),
                 user.getEmail()
         ));
+    }
+
+    // The directory where we will save the uploaded images locally
+    private final String UPLOAD_DIR = "uploads/images/";
+
+    // Method to handle profile picture upload
+    public String uploadProfilePicture(MultipartFile file, String email) {
+        return saveFileAndUpdateUser(file, email, true);
+    }
+
+    // Method to handle cover picture upload
+    public String uploadCoverPicture(MultipartFile file, String email) {
+        return saveFileAndUpdateUser(file, email, false);
+    }
+
+    // Core logic for saving the file and updating the DB
+    private String saveFileAndUpdateUser(MultipartFile file, String email, boolean isProfilePic) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        try {
+            // 1. Create the folder if it doesn't exist
+            Path uploadPath = Paths.get(UPLOAD_DIR);
+            if (!Files.exists(uploadPath)) {
+                Files.createDirectories(uploadPath);
+            }
+
+            // 2. Generate a unique file name (to avoid overwriting images with the same name)
+            String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
+            Path filePath = uploadPath.resolve(fileName);
+
+            // 3. Save the file to the hard drive
+            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+            // 4. Create the URL that the frontend will use to fetch the image
+            String fileUrl = "http://localhost:8080/api/users/images/" + fileName;
+
+            // 5. Update the user entity
+            if (isProfilePic) {
+                user.setProfilePictureUrl(fileUrl);
+            } else {
+                user.setCoverPictureUrl(fileUrl);
+            }
+
+            userRepository.save(user);
+            return fileUrl;
+
+        } catch (Exception e) {
+            throw new RuntimeException("Could not store file", e);
+        }
     }
 }

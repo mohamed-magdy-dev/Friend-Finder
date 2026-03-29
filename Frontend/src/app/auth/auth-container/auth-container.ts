@@ -37,6 +37,7 @@ export class AuthContainerComponent {
 
         localStorage.setItem('token', res.token);
         localStorage.setItem('fullName', res.fullName);
+        localStorage.setItem('userId', res.id); // <-- ضفناه هنا في اللوجين
 
         this.messageType = 'success';
         this.message = 'Login successful. Redirecting...';
@@ -46,9 +47,7 @@ export class AuthContainerComponent {
         }, 2000);
       },
       error: (err: any) => {
-
         this.messageType = 'error';
-
         if (err.error?.error) {
           this.message = err.error.error;
         } else {
@@ -66,6 +65,7 @@ export class AuthContainerComponent {
 
         localStorage.setItem('token', res.token);
         localStorage.setItem('fullName', res.fullName);
+        localStorage.setItem('userId', res.id); // <-- وضفناه هنا في الريجستر
 
         this.messageType = 'success';
         this.message = 'Account created successfully. Redirecting...';
@@ -75,9 +75,7 @@ export class AuthContainerComponent {
         }, 2000);
       },
       error: (err: any) => {
-
         this.messageType = 'error';
-
         if (err.error?.error) {
           this.message = err.error.error;
         } else {
@@ -86,7 +84,6 @@ export class AuthContainerComponent {
       }
     });
   }
-
   private clearMessage() {
     this.message = '';
     this.messageType = null;

@@ -17,6 +17,9 @@ export class UserProfile implements OnInit {
   profileData: any = null;
   userPosts: any[] = [];
   isLoadingPosts: boolean = true;
+  // cover and photo .. profile and cover variables
+  isUploadingProfile: boolean = false;
+  isUploadingCover: boolean = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -97,5 +100,48 @@ export class UserProfile implements OnInit {
         this.cdr.detectChanges();
       }
     });
+  }
+
+  onCoverSelected(event: any) {
+    const file: File = event.target.files[0];
+    if (file) {
+      this.isUploadingCover = true;
+      this.cdr.detectChanges();
+      
+      this.userService.uploadCoverPicture(file).subscribe({
+        next: (url: string) => {
+          this.profileData.coverPictureUrl = url;
+          this.isUploadingCover = false;
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          console.error('Error uploading cover:', err);
+          this.isUploadingCover = false;
+          this.cdr.detectChanges();
+        }
+      });
+    }
+  }
+
+  // Triggered when user selects a profile picture
+  onProfilePicSelected(event: any) {
+    const file: File = event.target.files[0];
+    if (file) {
+      this.isUploadingProfile = true;
+      this.cdr.detectChanges();
+
+      this.userService.uploadProfilePicture(file).subscribe({
+        next: (url: string) => {
+          this.profileData.profilePictureUrl = url;
+          this.isUploadingProfile = false;
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          console.error('Error uploading profile pic:', err);
+          this.isUploadingProfile = false;
+          this.cdr.detectChanges();
+        }
+      });
+    }
   }
 }

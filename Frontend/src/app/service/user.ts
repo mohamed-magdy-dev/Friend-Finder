@@ -93,4 +93,28 @@ export class UserService {
     return this.http.get<any>(`${this.apiUrl}/search/full?name=${name}&page=${page}&size=${size}`, { headers });
   }
   
+
+  // photos part :
+
+  // Upload Profile Picture
+  uploadProfilePicture(file: File): Observable<any> {
+    const formData = new FormData();
+    formData.append('file', file);
+    const token = localStorage.getItem('token');
+    // Note: Do not set 'Content-Type' manually for FormData, the browser will set it automatically with the boundary
+    const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
+    
+    // We expect a text response (the URL string)
+    return this.http.post(`${this.apiUrl}/profile-picture`, formData, { headers, responseType: 'text' });
+  }
+
+  // Upload Cover Banner
+  uploadCoverPicture(file: File): Observable<any> {
+    const formData = new FormData();
+    formData.append('file', file);
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
+    
+    return this.http.post(`${this.apiUrl}/cover-picture`, formData, { headers, responseType: 'text' });
+  }
 }

@@ -48,7 +48,7 @@ public class AuthService {
 
         //  extracting a token and returning it.
         String token = jwtUtils.generateToken(user.getEmail());
-        return new AuthResponse(token, user.getFullName());
+        return new AuthResponse(token, user.getFullName(),user.getId());
     }
 
     // login method
@@ -62,6 +62,6 @@ public class AuthService {
             throw new RuntimeException("Password Incorrect");
         }
         String token = jwtUtils.generateToken(user.getEmail());
-        return new AuthResponse(token, user.getFullName());
+        return new AuthResponse(token, user.getFullName(),user.getId());
     }
 }

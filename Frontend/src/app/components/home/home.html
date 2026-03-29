@@ -6,7 +6,7 @@
       
       <div class="ff-search-wrap d-none d-md-block position-relative">
         <i class="bi bi-search ff-search-icon"></i>
-       <input class="ff-search" type="search" placeholder="Search people..." 
+        <input class="ff-search" type="search" placeholder="Search people..." 
                [(ngModel)]="searchQuery" 
                (keyup)="onSearch()" 
                (keyup.enter)="onSearchEnter()" 
@@ -156,7 +156,6 @@
       </aside>
 
       <main class="col-lg-6 col-xl-6">
-
         <div class="ff-card p-3 mb-3 ff-anim">
           <div class="d-flex gap-3 align-items-start mb-0">
             <div class="ff-composer-avatar">{{ userName.charAt(0).toUpperCase() }}</div>
@@ -180,6 +179,7 @@
             <div class="ff-spinner"></div>
           </div>
         }
+        
         @if (!isLoading && posts.length === 0 && !errorMessage) {
           <div class="ff-card ff-state ff-anim">
             <div class="ff-state-icon"><i class="bi bi-inbox"></i></div>
@@ -190,9 +190,8 @@
 
         @for (post of posts; track post.id; let i = $index) {
           <div class="ff-card ff-card-post p-3 mb-3 ff-anim" [class]="'ff-d' + (i < 5 ? i + 1 : 5)">
-            
             <div class="d-flex align-items-center gap-3 mb-3">
-            <div class="ff-post-avatar" 
+              <div class="ff-post-avatar" 
                    [routerLink]="['/profile', post.authorId]" 
                    [style.background]="'hsl(' + (((post?.authorName?.charCodeAt(0) || 65) * 137) % 360) + ', 55%, 48%)'"
                    style="cursor: pointer;">
@@ -261,10 +260,8 @@
                 </div>
               </div>
             }
-
           </div>
         }
-
       </main>
 
       <aside class="col-lg-3 col-xl-3 ff-sidebar-right">

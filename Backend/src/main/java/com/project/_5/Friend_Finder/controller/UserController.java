@@ -11,6 +11,14 @@ import org.springframework.web.bind.annotation.*;
 import java.security.Principal;
 import java.util.List;
 
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.MediaType;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.Files;
+
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
@@ -54,5 +62,44 @@ public class UserController {
 
         Page<UserResponseDto> results = userService.getFullSearchResults(name, page, size);
         return ResponseEntity.ok(results);
+    }
+
+    // Endpoint to upload a profile picture
+    @PostMapping("/profile-picture")
+    public ResponseEntity<String> uploadProfilePicture(@RequestParam("file") MultipartFile file, Principal principal) {
+        String fileUrl = userService.uploadProfilePicture(file, principal.getName());
+        return ResponseEntity.ok(fileUrl);
+    }
+
+    // Endpoint to upload a cover banner
+    @PostMapping("/cover-picture")
+    public ResponseEntity<String> uploadCoverPicture(@RequestParam("file") MultipartFile file, Principal principal) {
+        String fileUrl = userService.uploadCoverPicture(file, principal.getName());
+        return ResponseEntity.ok(fileUrl);
+    }
+
+    // Endpoint to serve (display) the images to the frontend
+    @GetMapping("/images/{imageName}")
+    public ResponseEntity<Resource> getImage(@PathVariable String imageName) {
+        try {
+            Path imagePath = Paths.get("uploads/images/").resolve(imageName);
+            Resource resource = new UrlResource(imagePath.toUri());
+
+            if (resource.exists() || resource.isReadable()) {
+                // Try to determine the content type dynamically (e.g., image/png, image/jpeg)
+                String contentType = Files.probeContentType(imagePath);
+                if (contentType == null) {
+                    contentType = "application/octet-stream";
+                }
+
+                return ResponseEntity.ok()
+                        .contentType(MediaType.parseMediaType(contentType))
+                        .body(resource);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
     }
 }
