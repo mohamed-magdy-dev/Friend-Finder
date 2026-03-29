@@ -36,6 +36,8 @@ export class Home implements OnInit {
   // profile dropdown thingy
   isProfileMenuOpen: boolean = false;
 currentUserId: number = 0;
+// for profile picture
+currentUserPic: string | null = null;
   constructor(
     private router: Router,
     private postService: PostService,
@@ -43,6 +45,7 @@ currentUserId: number = 0;
     private commentsService: CommentsService,
     private userService: UserService,
     private notificationService: NotificationService,
+    
     
   ) {
     const storedName = localStorage.getItem('fullName');
@@ -53,10 +56,12 @@ currentUserId: number = 0;
 
   ngOnInit() {
     this.currentUserId = Number(localStorage.getItem('userId')) || 0;
+    this.loadCurrentUserProfile();
     this.loadPosts();
     this.loadSuggestedUsers();
     this.loadPendingRequests();
     this.loadNotifications();
+    
   }
 toggleNotifications() {
     this.isNotificationOpen = !this.isNotificationOpen;
@@ -79,6 +84,19 @@ toggleNotifications() {
       },
       error: (err: any) => console.error('Error fetching suggested users:', err)
     });
+  }
+
+  // profile img 
+  loadCurrentUserProfile() {
+    if (this.currentUserId > 0) {
+      this.userService.getUserProfile(this.currentUserId).subscribe({
+        next: (res: any) => {
+          this.currentUserPic = res.profilePictureUrl;
+          this.cdr.detectChanges();
+        },
+        error: (err: any) => console.error('Error fetching current user profile:', err)
+      });
+    }
   }
 
 createPost() {

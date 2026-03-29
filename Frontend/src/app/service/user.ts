@@ -34,7 +34,7 @@ export class UserService {
     const token = localStorage.getItem('token');
     const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
     
-    // بنستخدم http.delete عشان إحنا عاملينها DeleteMapping في الباك إند
+   
     return this.http.delete(`${this.friendsApiUrl}/cancel/${receiverId}`, { headers, responseType: 'text' as 'json' });
   }
 
@@ -96,25 +96,26 @@ export class UserService {
 
   // photos part :
 
-  // Upload Profile Picture
+  // 📸 Upload Profile Picture (Updated with correct response type)
   uploadProfilePicture(file: File): Observable<any> {
     const formData = new FormData();
     formData.append('file', file);
     const token = localStorage.getItem('token');
-    // Note: Do not set 'Content-Type' manually for FormData, the browser will set it automatically with the boundary
+    // Important: Headers DO NOT need 'Content-Type' when sending FormData
     const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
     
-    // We expect a text response (the URL string)
+    // THE FIX: Specify responseType as 'text' since backend returns a raw URL string 
     return this.http.post(`${this.apiUrl}/profile-picture`, formData, { headers, responseType: 'text' });
   }
 
-  // Upload Cover Banner
+  // 🖼️ Upload Cover Banner (Updated with correct response type)
   uploadCoverPicture(file: File): Observable<any> {
     const formData = new FormData();
     formData.append('file', file);
     const token = localStorage.getItem('token');
     const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
     
+    // THE FIX: Specify responseType as 'text' here too 
     return this.http.post(`${this.apiUrl}/cover-picture`, formData, { headers, responseType: 'text' });
   }
 }

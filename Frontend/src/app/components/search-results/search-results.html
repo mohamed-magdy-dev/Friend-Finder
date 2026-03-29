@@ -1,9 +1,9 @@
-<div class="ff-page-wrap">
+<div class="ff-page-wrap" style="background-color: #f4f6f8; min-height: 100vh; padding-bottom: 2rem;">
   
-  <nav class="ff-navbar d-flex align-items-center px-3 px-lg-4 mb-4 shadow-sm">
-    <div class="container-xl d-flex align-items-center gap-3 w-100">
-      <a routerLink="/home" class="ff-brand me-2 text-decoration-none text-dark" style="cursor: pointer;">
-        <i class="bi bi-arrow-left me-2"></i> Back to Feed
+  <nav class="navbar bg-white px-3 px-lg-4 mb-4 shadow-sm sticky-top" style="border-bottom: 1px solid #eaeaea; z-index: 1000;">
+    <div class="container-xl d-flex align-items-center w-100">
+      <a routerLink="/home" class="btn btn-light text-secondary fw-bold rounded-pill d-inline-flex align-items-center px-4 py-2" style="transition: all 0.2s ease;">
+        <i class="bi bi-arrow-left-short fs-4 me-1" style="margin-left: -5px;"></i> Back to Feed
       </a>
     </div>
   </nav>
@@ -12,43 +12,49 @@
     <div class="row justify-content-center">
       <div class="col-lg-8 col-xl-7">
 
-        <h4 class="fw-bold mb-4" style="color: var(--ff-clr-ink);">
-          Search results for: <span class="text-primary">"{{ searchQuery }}"</span>
-        </h4>
+        <div class="mb-4">
+          <h4 class="fw-bold m-0" style="color: #1a1a1a;">
+            Search results for: <span class="text-primary">"{{ searchQuery }}"</span>
+          </h4>
+        </div>
 
         @if (isLoading) {
-          <div class="text-center py-5">
+          <div class="text-center py-5 bg-white shadow-sm" style="border-radius: 16px; border: 1px solid #e0e4e8;">
             <div class="spinner-border text-primary" role="status"></div>
-            <p class="text-muted mt-2">Searching for people...</p>
+            <p class="text-muted mt-3 fw-medium mb-0">Searching for people...</p>
           </div>
         }
 
         @if (!isLoading && users.length === 0) {
-          <div class="text-center py-5 bg-white shadow-sm" style="border-radius: 12px;">
+          <div class="text-center py-5 bg-white shadow-sm" style="border-radius: 16px; border: 1px dashed #ced4da;">
             <i class="bi bi-search fs-1 text-muted d-block mb-3"></i>
-            <h5 class="text-muted mb-1">No results found</h5>
-            <p class="text-muted mb-0 small">Try searching with different keywords.</p>
+            <h5 class="fw-bold" style="color: #1a1a1a;">No results found</h5>
+            <p class="text-muted mb-0">We couldn't find anyone matching that name. Try different keywords.</p>
           </div>
         }
 
         <div class="d-flex flex-column gap-3 mb-4">
           @for (user of users; track user.id) {
-            <div class="ff-card p-3 shadow-sm border-0 bg-white ff-anim" style="border-radius: 12px;">
+            <div class="ff-card p-3 shadow-sm bg-white ff-anim" style="border-radius: 16px; border: 1px solid #e0e4e8;">
               <div class="d-flex align-items-center gap-3">
-                <div class="ff-post-avatar text-white d-flex align-items-center justify-content-center fw-bold" 
+                
+                <div class="ff-post-avatar text-white d-flex align-items-center justify-content-center fw-bold shadow-sm" 
                      [routerLink]="['/profile', user.id]"
-                     [style.background]="'hsl(' + ((user.fullName.charCodeAt(0) || 65) * 137 % 360) + ',70%,52%)'"
-                     style="width: 50px; height: 50px; font-size: 1.2rem; cursor: pointer;">
-                  {{ user.fullName.charAt(0).toUpperCase() }}
+                     [style.background]="user.profilePictureUrl ? 'url(\'' + user.profilePictureUrl + '\') center/cover' : 'hsl(' + ((user.fullName.charCodeAt(0) || 65) * 137 % 360) + ',70%,52%)'"
+                     style="width: 56px; height: 56px; font-size: 1.4rem; cursor: pointer; border-radius: 50%;">
+                  {{ !user.profilePictureUrl ? user.fullName.charAt(0).toUpperCase() : '' }}
                 </div>
                 
                 <div class="flex-grow-1" [routerLink]="['/profile', user.id]" style="cursor: pointer;">
-                  <h6 class="mb-0 fw-bold" style="color: var(--ff-clr-ink); font-size: 1.1rem;">{{ user.fullName }}</h6>
-                  <p class="text-muted mb-0 small">&#64;{{ user.fullName.toLowerCase().replace(' ', '') }}</p>
+                  <h6 class="mb-1 fw-bold" style="color: #1a1a1a; font-size: 1.1rem;">{{ user.fullName }}</h6>
+                  <p class="text-muted mb-0" style="font-size: 0.9rem;">&#64;{{ user.fullName.toLowerCase().replace(' ', '') }}</p>
                 </div>
 
-                <button class="btn btn-outline-primary rounded-pill px-4" [routerLink]="['/profile', user.id]">
+                <button class="btn btn-outline-primary rounded-pill px-4 py-2 fw-bold d-none d-sm-block" [routerLink]="['/profile', user.id]">
                   View Profile
+                </button>
+                <button class="btn btn-light rounded-circle d-sm-none text-primary" [routerLink]="['/profile', user.id]">
+                  <i class="bi bi-chevron-right"></i>
                 </button>
               </div>
             </div>
@@ -56,16 +62,16 @@
         </div>
 
         @if (!isLoading && totalPages > 1) {
-          <div class="d-flex justify-content-between align-items-center bg-white p-3 shadow-sm" style="border-radius: 12px;">
-            <button class="btn btn-light border fw-bold" (click)="prevPage()" [disabled]="currentPage === 0">
-              <i class="bi bi-chevron-left me-1"></i> Previous
+          <div class="d-flex justify-content-between align-items-center bg-white p-3 shadow-sm" style="border-radius: 16px; border: 1px solid #e0e4e8;">
+            <button class="btn btn-light border fw-bold rounded-pill px-4" (click)="prevPage()" [disabled]="currentPage === 0">
+              <i class="bi bi-chevron-left me-1"></i> Prev
             </button>
             
-            <span class="text-muted fw-bold small">
+            <span class="text-muted fw-bold" style="font-size: 0.95rem;">
               Page {{ currentPage + 1 }} of {{ totalPages }}
             </span>
             
-            <button class="btn btn-light border fw-bold" (click)="nextPage()" [disabled]="currentPage === totalPages - 1">
+            <button class="btn btn-light border fw-bold rounded-pill px-4" (click)="nextPage()" [disabled]="currentPage === totalPages - 1">
               Next <i class="bi bi-chevron-right ms-1"></i>
             </button>
           </div>

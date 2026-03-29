@@ -18,9 +18,9 @@
               <a class="dropdown-item d-flex align-items-center gap-2 p-2 rounded ff-anim" 
                  [routerLink]="['/profile', user.id]" style="cursor: pointer;">
                 <div class="ff-post-avatar text-white d-flex align-items-center justify-content-center fw-bold" 
-                     [style.background]="'hsl(' + ((user.fullName.charCodeAt(0) || 65) * 137 % 360) + ',70%,52%)'"
+                     [style.background]="user.profilePictureUrl ? 'url(\'' + user.profilePictureUrl + '\') center/cover' : 'hsl(' + ((user.fullName.charCodeAt(0) || 65) * 137 % 360) + ',70%,52%)'"
                      style="width:32px; height:32px; font-size:.8rem;">
-                  {{ user.fullName.charAt(0).toUpperCase() }}
+                  {{ !user.profilePictureUrl ? user.fullName.charAt(0).toUpperCase() : '' }}
                 </div>
                 <span class="fw-bold text-dark" style="font-size: 0.9rem;">{{ user.fullName }}</span>
               </a>
@@ -34,7 +34,6 @@
       </div>
       
       <div class="ms-auto d-flex align-items-center gap-3">
-        
         <a routerLink="/friend-requests" class="btn btn-link text-dark position-relative p-1 border-0" style="background: transparent;">
           <i class="bi bi-people-fill fs-4"></i>
           @if (pendingRequests.length > 0) {
@@ -100,7 +99,11 @@
             <span class="d-none d-sm-block" style="font-size:.82rem; color:var(--ff-clr-ink-2);">
               Hey, <strong style="color:var(--ff-clr-ink); font-weight:700;">{{ userName }}</strong>
             </span>
-            <div class="ff-nav-avatar">{{ userName.charAt(0).toUpperCase() }}</div>
+            <div class="ff-nav-avatar text-white d-flex align-items-center justify-content-center fw-bold shadow-sm" 
+                 [style.background]="currentUserPic ? 'url(\'' + currentUserPic + '\') center/cover' : 'var(--ff-clr-accent)'"
+                 style="background-color: var(--ff-clr-accent);">
+              {{ !currentUserPic ? userName.charAt(0).toUpperCase() : '' }}
+            </div>
           </div>
 
           @if (isProfileMenuOpen) {
@@ -119,7 +122,6 @@
             </div>
           }
         </div>
-        
       </div>
     </div>
   </nav>
@@ -131,7 +133,12 @@
         <div class="ff-card mb-3 overflow-hidden ff-anim">
           <div class="ff-profile-stripe"></div>
           <div class="px-3 pb-3 text-center">
-            <div class="ff-avatar-lg mx-auto mb-2">{{ userName.charAt(0).toUpperCase() }}</div>
+            <div class="ff-avatar-lg mx-auto mb-2 text-white d-flex align-items-center justify-content-center fw-bold shadow-sm"
+                 [style.background]="currentUserPic ? 'url(\'' + currentUserPic + '\') center/cover' : 'var(--ff-clr-accent)'"
+                 style="background-color: var(--ff-clr-accent);">
+              {{ !currentUserPic ? userName.charAt(0).toUpperCase() : '' }}
+            </div>
+            
             <p class="ff-profile-name">{{ userName }}</p>
             <p class="ff-profile-handle">&#64;{{ userName.toLowerCase().replace(' ', '') }}</p>
             <div class="d-flex justify-content-center gap-4 mt-3 pt-3" style="border-top: 1px solid var(--ff-clr-border);">
@@ -156,9 +163,15 @@
       </aside>
 
       <main class="col-lg-6 col-xl-6">
+        
         <div class="ff-card p-3 mb-3 ff-anim">
           <div class="d-flex gap-3 align-items-start mb-0">
-            <div class="ff-composer-avatar">{{ userName.charAt(0).toUpperCase() }}</div>
+            <div class="ff-composer-avatar text-white d-flex align-items-center justify-content-center fw-bold shadow-sm"
+                 [style.background]="currentUserPic ? 'url(\'' + currentUserPic + '\') center/cover' : 'var(--ff-clr-accent)'"
+                 style="background-color: var(--ff-clr-accent);">
+              {{ !currentUserPic ? userName.charAt(0).toUpperCase() : '' }}
+            </div>
+            
             <textarea class="ff-composer-input" rows="2" 
                       placeholder="What's on your mind, {{ userName }}?" 
                       [(ngModel)]="newPostContent"></textarea>
@@ -191,11 +204,11 @@
         @for (post of posts; track post.id; let i = $index) {
           <div class="ff-card ff-card-post p-3 mb-3 ff-anim" [class]="'ff-d' + (i < 5 ? i + 1 : 5)">
             <div class="d-flex align-items-center gap-3 mb-3">
-              <div class="ff-post-avatar" 
+              <div class="ff-post-avatar text-white d-flex align-items-center justify-content-center fw-bold" 
                    [routerLink]="['/profile', post.authorId]" 
-                   [style.background]="'hsl(' + (((post?.authorName?.charCodeAt(0) || 65) * 137) % 360) + ', 55%, 48%)'"
-                   style="cursor: pointer;">
-                {{ post?.authorName?.charAt(0)?.toUpperCase() || 'U' }}
+                   [style.background]="post.authorProfilePictureUrl ? 'url(\'' + post.authorProfilePictureUrl + '\') center/cover' : 'hsl(' + (((post?.authorName?.charCodeAt(0) || 65) * 137) % 360) + ', 55%, 48%)'"
+                   style="cursor: pointer; border: 1px solid #eee;">
+                {{ !post.authorProfilePictureUrl ? (post?.authorName?.charAt(0)?.toUpperCase() || 'U') : '' }}
               </div>
               <div class="flex-grow-1">
                 <p class="ff-post-author text-decoration-none text-dark d-inline-block m-0" 
@@ -232,8 +245,10 @@
               <div class="ff-comments-section mt-3 pt-3" style="border-top: 1px solid var(--ff-clr-border);">
                 @for (comment of post.commentsList; track comment.id) {
                   <div class="d-flex gap-2 mb-3">
-                    <div class="ff-post-avatar" style="width: 32px; height: 32px; font-size: 0.8rem; background: var(--ff-clr-ink-3);">
-                      {{ comment.authorName.charAt(0).toUpperCase() }}
+                    <div class="ff-post-avatar text-white d-flex align-items-center justify-content-center" 
+                         [style.background]="comment.authorProfilePictureUrl ? 'url(\'' + comment.authorProfilePictureUrl + '\') center/cover' : 'var(--ff-clr-ink-3)'"
+                         style="width: 32px; height: 32px; font-size: 0.8rem; border: 1px solid #eee;">
+                      {{ !comment.authorProfilePictureUrl ? comment.authorName.charAt(0).toUpperCase() : '' }}
                     </div>
                     <div class="ff-comment-bubble">
                       <strong class="ff-comment-author">{{ comment.authorName }}</strong>
@@ -243,8 +258,10 @@
                 }
 
                 <div class="d-flex gap-2 mt-2 align-items-start">
-                  <div class="ff-post-avatar" style="width: 32px; height: 32px; font-size: 0.8rem; background: var(--ff-clr-accent);">
-                    {{ userName.charAt(0).toUpperCase() }}
+                  <div class="ff-post-avatar text-white d-flex align-items-center justify-content-center shadow-sm" 
+                       [style.background]="currentUserPic ? 'url(\'' + currentUserPic + '\') center/cover' : 'var(--ff-clr-accent)'"
+                       style="width: 32px; height: 32px; font-size: 0.8rem; background-color: var(--ff-clr-accent);">
+                    {{ !currentUserPic ? userName.charAt(0).toUpperCase() : '' }}
                   </div>
                   <div class="flex-grow-1">
                     <textarea class="ff-composer-input ff-comment-input" rows="1" 
@@ -271,11 +288,11 @@
             
             @for (user of suggestedUsers; track user.id) {
               <div class="d-flex align-items-center gap-2 ff-suggest-item">
-                <div class="ff-post-avatar" 
+                <div class="ff-post-avatar text-white d-flex align-items-center justify-content-center fw-bold" 
                      [routerLink]="['/profile', user.id]"
-                     [style.background]="'hsl(' + ((user.fullName.charCodeAt(0) || 65) * 137 % 360) + ',70%,52%)'"
-                     style="width:36px;height:36px;font-size:.85rem; cursor: pointer;">
-                  {{ user.fullName.charAt(0).toUpperCase() }}
+                     [style.background]="user.profilePictureUrl ? 'url(\'' + user.profilePictureUrl + '\') center/cover' : 'hsl(' + ((user.fullName.charCodeAt(0) || 65) * 137 % 360) + ',70%,52%)'"
+                     style="width:36px;height:36px;font-size:.85rem; cursor: pointer; border: 1px solid #eee;">
+                  {{ !user.profilePictureUrl ? user.fullName.charAt(0).toUpperCase() : '' }}
                 </div>
                 
                 <div class="flex-grow-1" [routerLink]="['/profile', user.id]" style="cursor: pointer; min-width: 0;">

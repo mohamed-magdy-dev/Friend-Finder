@@ -69,6 +69,7 @@ public class PostService {
                 post.getUser().getId(),
                 post.getUser().getFullName(),
                 post.getUser().getEmail(),
+                post.getUser().getProfilePictureUrl(),
                 likeCount, // added counts (for like)
                 isLiked    // added this
         );

@@ -67,6 +67,7 @@ public class UserController {
     // Endpoint to upload a profile picture
     @PostMapping("/profile-picture")
     public ResponseEntity<String> uploadProfilePicture(@RequestParam("file") MultipartFile file, Principal principal) {
+
         String fileUrl = userService.uploadProfilePicture(file, principal.getName());
         return ResponseEntity.ok(fileUrl);
     }

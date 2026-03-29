@@ -20,7 +20,7 @@ public class PostResponseDto {
     private Long authorId; // added this for profile page
     private String authorName;
     private String authorEmail;
-
+    private String authorProfilePictureUrl;
     // for "likes" to solve the "like post" problem:
     // added JsonProperty since Lombok doesn't want to send the name as it should!
     @JsonProperty("likeCount")

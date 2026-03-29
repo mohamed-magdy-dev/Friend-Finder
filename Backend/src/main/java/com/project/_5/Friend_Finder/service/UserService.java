@@ -151,28 +151,36 @@ public class UserService {
         return saveFileAndUpdateUser(file, email, false);
     }
 
-    // Core logic for saving the file and updating the DB
+    // Core logic for saving the file and updating the DB  with the fix (Sanitization & Cleanup)
     private String saveFileAndUpdateUser(MultipartFile file, String email, boolean isProfilePic) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         try {
-            // 1. Create the folder if it doesn't exist
+            // 1. Ensure the upload directory exists
             Path uploadPath = Paths.get(UPLOAD_DIR);
             if (!Files.exists(uploadPath)) {
                 Files.createDirectories(uploadPath);
             }
 
-            // 2. Generate a unique file name (to avoid overwriting images with the same name)
-            String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
+            // 2. Sanitize the original filename to remove spaces and special characters
+            String originalFilename = file.getOriginalFilename();
+            if (originalFilename != null) {
+                originalFilename = originalFilename.replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
+            } else {
+                originalFilename = "uploaded_image.jpg";
+            }
+
+            // 3. Generate a unique file name to prevent overwriting
+            String fileName = UUID.randomUUID().toString() + "_" + originalFilename;
             Path filePath = uploadPath.resolve(fileName);
 
-            // 3. Save the file to the hard drive
+            // 4. Save the file to the local file system
             Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
-            // 4. Create the URL that the frontend will use to fetch the image
+            // 5. Construct the retrieval URL for the frontend
             String fileUrl = "http://localhost:8080/api/users/images/" + fileName;
 
-            // 5. Update the user entity
+            // 6. Update the user record
             if (isProfilePic) {
                 user.setProfilePictureUrl(fileUrl);
             } else {
@@ -183,7 +191,7 @@ public class UserService {
             return fileUrl;
 
         } catch (Exception e) {
-            throw new RuntimeException("Could not store file", e);
+            throw new RuntimeException("Failed to store file", e);
         }
     }
 }
