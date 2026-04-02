@@ -1,5 +1,6 @@
 package com.project._5.Friend_Finder.service;
 
+import com.project._5.Friend_Finder.dto.ProfileUpdateRequestDto;
 import com.project._5.Friend_Finder.dto.UserProfileDto;
 import com.project._5.Friend_Finder.dto.UserResponseDto;
 import com.project._5.Friend_Finder.entity.Friendship;
@@ -193,5 +194,18 @@ public class UserService {
         } catch (Exception e) {
             throw new RuntimeException("Failed to store file", e);
         }
+    }
+    // ===================== UPDATE USER PROFILE =====================
+    public UserProfileDto updateUserProfile(String email, ProfileUpdateRequestDto request) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        user.setFullName(request.getFullName());
+        user.setBio(request.getBio());
+        user.setBirthDate(request.getBirthDate());
+
+        userRepository.save(user);
+
+        return getUserProfile(user.getId(), email);
     }
 }

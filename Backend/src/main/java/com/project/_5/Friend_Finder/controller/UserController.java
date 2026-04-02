@@ -72,7 +72,7 @@ public class UserController {
         return ResponseEntity.ok(fileUrl);
     }
 
-    // Endpoint to upload a cover banner
+    // ----------- Endpoint to upload a cover banner----------
     @PostMapping("/cover-picture")
     public ResponseEntity<String> uploadCoverPicture(@RequestParam("file") MultipartFile file, Principal principal) {
         String fileUrl = userService.uploadCoverPicture(file, principal.getName());
@@ -102,5 +102,12 @@ public class UserController {
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
         }
+    }
+
+    // ===================== UPDATE PROFILE ENDPOINT =====================
+    @PutMapping("/profile/update")
+    public ResponseEntity<UserProfileDto> updateProfile(@RequestBody com.project._5.Friend_Finder.dto.ProfileUpdateRequestDto request, Principal principal) {
+        UserProfileDto updatedProfile = userService.updateUserProfile(principal.getName(), request);
+        return ResponseEntity.ok(updatedProfile);
     }
 }

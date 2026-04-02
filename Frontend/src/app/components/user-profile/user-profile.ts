@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { UserService } from '../../service/user';
 import { PostService } from '../../service/post';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-user-profile',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, FormsModule],
   templateUrl: './user-profile.html',
   styleUrl: './user-profile.css'
 })
@@ -20,6 +21,14 @@ export class UserProfile implements OnInit {
   // cover and photo .. profile and cover variables
   isUploadingProfile: boolean = false;
   isUploadingCover: boolean = false;
+  // for bio update
+  isEditModalOpen: boolean = false;
+    isUpdatingProfile: boolean = false;
+    editFormData: any = {
+      fullName: '',
+      bio: '',
+      birthDate: ''
+    };
 
   constructor(
     private route: ActivatedRoute,
@@ -143,5 +152,40 @@ export class UserProfile implements OnInit {
         }
       });
     }
+  }
+
+
+  // ===================== EDIT PROFILE METHODS =====================
+  openEditModal() {
+    this.editFormData = {
+      fullName: this.profileData.fullName,
+      bio: this.profileData.bio || '',
+      birthDate: this.profileData.birthDate || ''
+    };
+    this.isEditModalOpen = true;
+  }
+
+  closeEditModal() {
+    this.isEditModalOpen = false;
+  }
+
+  submitProfileUpdate() {
+    if (!this.editFormData.fullName.trim()) return; // the name should not be empty
+
+    this.isUpdatingProfile = true;
+    this.userService.updateUserProfile(this.editFormData).subscribe({
+      next: (res) => {
+        this.profileData = res; // update info 
+        localStorage.setItem('fullName', res.fullName); // update the name 
+        this.isUpdatingProfile = false;
+        this.closeEditModal();
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error updating profile:', err);
+        this.isUpdatingProfile = false;
+        this.cdr.detectChanges();
+      }
+    });
   }
 }

@@ -96,7 +96,7 @@ export class UserService {
 
   // photos part :
 
-  // 📸 Upload Profile Picture (Updated with correct response type)
+  // Upload Profile Picture (Updated with correct response type)
   uploadProfilePicture(file: File): Observable<any> {
     const formData = new FormData();
     formData.append('file', file);
@@ -108,7 +108,7 @@ export class UserService {
     return this.http.post(`${this.apiUrl}/profile-picture`, formData, { headers, responseType: 'text' });
   }
 
-  // 🖼️ Upload Cover Banner (Updated with correct response type)
+  // Upload Cover Banner (Updated with correct response type)
   uploadCoverPicture(file: File): Observable<any> {
     const formData = new FormData();
     formData.append('file', file);
@@ -117,5 +117,12 @@ export class UserService {
     
     // THE FIX: Specify responseType as 'text' here too 
     return this.http.post(`${this.apiUrl}/cover-picture`, formData, { headers, responseType: 'text' });
+  }
+
+  // Update User Profile Details
+  updateUserProfile(profileData: any): Observable<any> {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
+    return this.http.put<any>(`${this.apiUrl}/profile/update`, profileData, { headers });
   }
 }

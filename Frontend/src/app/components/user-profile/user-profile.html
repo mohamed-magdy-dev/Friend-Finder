@@ -102,8 +102,8 @@
                   </button>
                 }
 
-                @if (profileData.friendshipStatus === 'SELF') {
-                  <button class="btn btn-light border px-4 py-2 fw-bold d-flex align-items-center rounded-pill text-dark">
+               @if (profileData.friendshipStatus === 'SELF') {
+                  <button class="btn btn-light border px-4 py-2 fw-bold d-flex align-items-center rounded-pill text-dark" (click)="openEditModal()">
                     <i class="bi bi-pencil-square me-2 fs-5"></i> Edit Profile
                   </button>
                 }
@@ -173,3 +173,51 @@
     </div>
   </div>
 </div>
+
+@if (isEditModalOpen) {
+  <div class="modal-backdrop fade show" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1040; background-color: rgba(0,0,0,0.5); backdrop-filter: blur(3px);"></div>
+  
+  <div class="modal fade show" tabindex="-1" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1050; display: flex !important; align-items: center; justify-content: center;">
+    <div class="modal-dialog w-100" style="max-width: 500px; margin: 0;">
+      <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+        
+        <div class="modal-header border-bottom-0 pb-0 mt-2 mx-2">
+          <h5 class="modal-title fw-bold" style="color: #1a1a1a;">Edit Profile</h5>
+          <button type="button" class="btn-close shadow-none" (click)="closeEditModal()"></button>
+        </div>
+        
+        <div class="modal-body px-4">
+          <div class="mb-3">
+            <label class="form-label fw-bold text-muted small mb-1">Full Name <span class="text-danger">*</span></label>
+            <input type="text" class="form-control px-3 py-2" style="border-radius: 10px; background-color: #f8f9fa;" [(ngModel)]="editFormData.fullName" placeholder="Your full name">
+          </div>
+          
+          <div class="mb-3">
+            <label class="form-label fw-bold text-muted small mb-1">Bio</label>
+            <textarea class="form-control px-3 py-2" rows="3" style="border-radius: 10px; background-color: #f8f9fa;" [(ngModel)]="editFormData.bio" placeholder="Tell everyone a little about yourself..."></textarea>
+          </div>
+          
+          <div class="mb-3">
+            <label class="form-label fw-bold text-muted small mb-1">Birth Date</label>
+            <input type="date" class="form-control px-3 py-2" style="border-radius: 10px; background-color: #f8f9fa;" [(ngModel)]="editFormData.birthDate">
+          </div>
+        </div>
+        
+        <div class="modal-footer border-top-0 pt-0 pb-3 px-4 d-flex gap-2">
+          <button type="button" class="btn btn-light rounded-pill px-4 fw-bold flex-grow-1" style="background-color: #f0f2f5;" (click)="closeEditModal()">Cancel</button>
+          
+          <button type="button" class="btn btn-primary rounded-pill px-4 fw-bold flex-grow-1" 
+                  (click)="submitProfileUpdate()" 
+                  [disabled]="isUpdatingProfile || !editFormData.fullName.trim()">
+            @if (isUpdatingProfile) {
+              <span class="spinner-border spinner-border-sm me-2"></span> Saving...
+            } @else {
+              Save Changes
+            }
+          </button>
+        </div>
+        
+      </div>
+    </div>
+  </div>
+}
