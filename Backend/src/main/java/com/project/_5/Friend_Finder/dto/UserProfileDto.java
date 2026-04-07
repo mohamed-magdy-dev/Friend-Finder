@@ -22,5 +22,6 @@ public class UserProfileDto {
     // status can be: "SELF", "FRIENDS", "PENDING_SENT", "PENDING_RECEIVED", "NONE"
     private String friendshipStatus;
 
-
+    private Integer postsCount;
+    private Integer friendsCount;
 }

@@ -125,4 +125,17 @@ export class UserService {
     const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
     return this.http.put<any>(`${this.apiUrl}/profile/update`, profileData, { headers });
   }
+  
+  // unfriend user
+ unfriendUser(friendId: number) {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    
+    const correctUrl = `http://localhost:8080/api/friends/unfriend/${friendId}`;
+    
+    return this.http.delete(correctUrl, { 
+      headers: headers, 
+      responseType: 'text' 
+    });
+  }
 }

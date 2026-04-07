@@ -11,6 +11,10 @@ import java.util.List;
 @Repository
 public interface FriendshipRepository extends JpaRepository<Friendship, Long> {
 
+    Integer countBySenderAndStatus(User sender, String status);
+
+    Integer countByReceiverAndStatus(User receiver, String status);
+
     // 1- method to ask: has user A sent request to user B before?
     // nobody wants the same friend  request 50 times!
     Optional<Friendship> findBySenderAndReceiver(User sender, User receiver);

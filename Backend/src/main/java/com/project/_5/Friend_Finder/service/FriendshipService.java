@@ -18,28 +18,26 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class FriendshipService {
 
-
     private final FriendshipRepository friendshipRepository;
     private final UserRepository userRepository;
     private final NotificationRepository notificationRepository;
 
-
+    /**
+     * Sends a friend request from the current user to another user.
+     */
     public String sendFriendRequest(String senderEmail, Long receiverId) {
-
 
         User sender = userRepository.findByEmail(senderEmail)
                 .orElseThrow(() -> new RuntimeException("Sender not found"));
 
-
         User receiver = userRepository.findById(receiverId)
                 .orElseThrow(() -> new RuntimeException("Receiver not found"));
-
 
         if (sender.getId().equals(receiver.getId())) {
             throw new RuntimeException("You cannot send a friend request to yourself!");
         }
 
-
+        // Check if there's already a pending or accepted request in either direction
         Optional<Friendship> existingRequest = friendshipRepository.findBySenderAndReceiver(sender, receiver);
         Optional<Friendship> reverseRequest = friendshipRepository.findBySenderAndReceiver(receiver, sender);
 
@@ -47,26 +45,25 @@ public class FriendshipService {
             throw new RuntimeException("Friend request already exists!");
         }
 
-
         Friendship friendship = new Friendship();
         friendship.setSender(sender);
         friendship.setReceiver(receiver);
         friendship.setStatus("PENDING");
         friendshipRepository.save(friendship);
 
-
+        // Create a notification for the receiver
         Notification notification = new Notification();
         notification.setUser(receiver);
         notification.setMessage(sender.getFullName() + " sent you a friend request.");
-
         notificationRepository.save(notification);
 
         return "Friend request sent successfully!";
     }
 
-    // ok what if the user sent friend request by accident?
-    // we will have to make another method to recover that disaster
-
+    /**
+     * Cancels a friend request sent by mistake.
+     * It also cleans up the notification sent to the receiver to avoid confusion.
+     */
     public String cancelFriendRequest(String senderEmail, Long receiverId) {
         User sender = userRepository.findByEmail(senderEmail)
                 .orElseThrow(() -> new RuntimeException("Sender not found"));
@@ -77,16 +74,16 @@ public class FriendshipService {
         Friendship friendship = friendshipRepository.findBySenderAndReceiver(sender, receiver)
                 .orElseThrow(() -> new RuntimeException("Friend request not found"));
 
-
         friendshipRepository.delete(friendship);
 
-
+        // Clean up the notification associated with this request
         String expectedMessage = sender.getFullName() + " sent you a friend request.";
         List<Notification> notifications = notificationRepository.findByUserAndMessage(receiver, expectedMessage);
         notificationRepository.deleteAll(notifications);
 
         return "Friend request cancelled successfully!";
     }
+
     /**
      * Accepts a pending friend request and creates a notification for the sender.
      */
@@ -155,5 +152,31 @@ public class FriendshipService {
                         request.getSender().getEmail()
                 ))
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Removes an existing friendship (Unfriend).
+     * It checks both directions since either user could have initiated the friendship.
+     */
+    public String unfriend(String currentUserEmail, Long friendId) {
+        User currentUser = userRepository.findByEmail(currentUserEmail)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        User friend = userRepository.findById(friendId)
+                .orElseThrow(() -> new RuntimeException("Friend not found"));
+
+        // We must check both directions to find the friendship record
+        Optional<Friendship> friendship = friendshipRepository.findBySenderAndReceiver(currentUser, friend);
+        if (friendship.isEmpty()) {
+            friendship = friendshipRepository.findBySenderAndReceiver(friend, currentUser);
+        }
+
+        // If a friendship exists and is accepted, delete it
+        if (friendship.isPresent() && "ACCEPTED".equals(friendship.get().getStatus())) {
+            friendshipRepository.delete(friendship.get());
+            return "Unfriended successfully.";
+        } else {
+            throw new RuntimeException("You are not friends with this user.");
+        }
     }
 }

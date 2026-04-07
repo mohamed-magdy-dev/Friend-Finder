@@ -58,4 +58,11 @@ public class FriendshipController {
         List<FriendRequestsDto> requests = friendshipService.getPendingRequests(principal.getName());
         return ResponseEntity.ok(requests);
     }
+
+    @DeleteMapping("/unfriend/{friendId}")
+    public ResponseEntity<String> unfriend(Principal principal, @PathVariable Long friendId) {
+        String result = friendshipService.unfriend(principal.getName(), friendId);
+        return ResponseEntity.ok(result);
+    }
+
 }

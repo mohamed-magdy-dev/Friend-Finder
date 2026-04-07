@@ -92,4 +92,18 @@ public class PostService {
 
         return userPosts.map(post -> mapToDto(post, currentUser));
     }
+
+    // deleting posts
+    public String deletePost(Long postId, String userEmail) {
+
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new RuntimeException("Post not found"));
+
+        if (!post.getUser().getEmail().equals(userEmail)) {
+            throw new RuntimeException("Unauthorized: You can only delete your own posts.");
+        }
+
+        postRepository.delete(post);
+        return "Post deleted successfully.";
+    }
 }

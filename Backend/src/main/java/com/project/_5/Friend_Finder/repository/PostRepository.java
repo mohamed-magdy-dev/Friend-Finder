@@ -13,8 +13,9 @@ import java.util.List;
 public interface PostRepository extends JpaRepository<Post, Long> {
 
     Page<Post> findAllByOrderByCreatedAtDesc(Pageable pageable);
-
+    //post count
+    Integer countByUser(User user);
     // Fetches posts authored by a specific user, ordered by newest first
-    Page<Post> findByUserOrderByCreatedAtDesc(User author, Pageable pageable);
+    Page<Post> findByUserOrderByCreatedAtDesc(User user, Pageable pageable);
 
 }

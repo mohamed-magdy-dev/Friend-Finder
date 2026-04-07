@@ -72,7 +72,8 @@ public class UserController {
         return ResponseEntity.ok(fileUrl);
     }
 
-    // ----------- Endpoint to upload a cover banner----------
+    // -----------
+    // Endpoint to upload a cover banner----------
     @PostMapping("/cover-picture")
     public ResponseEntity<String> uploadCoverPicture(@RequestParam("file") MultipartFile file, Principal principal) {
         String fileUrl = userService.uploadCoverPicture(file, principal.getName());

@@ -24,6 +24,9 @@ export class Home implements OnInit {
   isPosting: boolean = false;
   suggestedUsers: any[] = [];
   pendingRequests: any[] = [];
+  //counters :
+  postsCount: number = 0;
+  friendsCount: number = 0;
   // notification:
   notifications: any[] = [];
   unreadNotificationsCount: number = 0;
@@ -92,6 +95,10 @@ toggleNotifications() {
       this.userService.getUserProfile(this.currentUserId).subscribe({
         next: (res: any) => {
           this.currentUserPic = res.profilePictureUrl;
+
+              this.postsCount = res.postsCount || 0;
+              this.friendsCount = res.friendsCount || 0;
+
           this.cdr.detectChanges();
         },
         error: (err: any) => console.error('Error fetching current user profile:', err)
@@ -357,5 +364,42 @@ createPost() {
       this.isSearchDropdownOpen = false;
       this.cdr.detectChanges();
     }, 200);
+  }
+
+  postToDelete: any = null;
+  isDeleting: boolean = false;
+
+  
+  openDeleteModal(post: any) {
+    this.postToDelete = post;
+  }
+
+  
+  closeDeleteModal() {
+    this.postToDelete = null;
+  }
+
+ 
+  confirmDelete() {
+    if (!this.postToDelete) return;
+
+    this.isDeleting = true; 
+
+    this.postService.deletePost(this.postToDelete.id).subscribe({
+      next: () => {
+        
+        this.posts = this.posts.filter(p => p.id !== this.postToDelete.id);
+        
+        
+        this.isDeleting = false;
+        this.postToDelete = null;
+        this.cdr.detectChanges();
+      },
+      error: (err: any) => {
+        console.error('Error deleting post:', err);
+        this.isDeleting = false;
+        this.cdr.detectChanges();
+      }
+    });
   }
 }

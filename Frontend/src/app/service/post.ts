@@ -46,4 +46,15 @@ export class PostService {
     
     return this.http.get<any>(`${this.apiUrl}/user/${userId}?page=${page}&size=${size}`, { headers });
   }
+
+  deletePost(postId: number) {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    
+   
+    return this.http.delete(`${this.apiUrl}/${postId}`, { 
+      headers: headers, 
+      responseType: 'text' 
+    });
+  }
 }

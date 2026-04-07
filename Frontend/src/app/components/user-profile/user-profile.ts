@@ -4,6 +4,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { UserService } from '../../service/user';
 import { PostService } from '../../service/post';
 import { FormsModule } from '@angular/forms';
+import { ToastService } from '../../service/toast';
 
 @Component({
   selector: 'app-user-profile',
@@ -34,7 +35,8 @@ export class UserProfile implements OnInit {
     private route: ActivatedRoute,
     private userService: UserService,
     private postService: PostService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private toastService: ToastService
   ) {}
 
   ngOnInit() {
@@ -170,22 +172,45 @@ export class UserProfile implements OnInit {
   }
 
   submitProfileUpdate() {
-    if (!this.editFormData.fullName.trim()) return; // the name should not be empty
+    if (!this.editFormData.fullName.trim()) return;
 
     this.isUpdatingProfile = true;
+    this.cdr.detectChanges();
+
     this.userService.updateUserProfile(this.editFormData).subscribe({
       next: (res) => {
-        this.profileData = res; // update info 
-        localStorage.setItem('fullName', res.fullName); // update the name 
+        this.profileData = res;
+        localStorage.setItem('fullName', res.fullName);
         this.isUpdatingProfile = false;
         this.closeEditModal();
         this.cdr.detectChanges();
+        
+        this.toastService.show('Profile updated successfully!', 'success'); 
       },
       error: (err) => {
         console.error('Error updating profile:', err);
         this.isUpdatingProfile = false;
         this.cdr.detectChanges();
+        
+        this.toastService.show('Failed to update profile. Please try again.', 'error');
       }
+    });
+  }
+
+  unfriend() {
+    this.userService.unfriendUser(this.userId).subscribe({
+      next: () => {
+        // بنغير الحالة فوراً لـ NONE علشان الزرار يقلب Add Friend
+        this.profileData.friendshipStatus = 'NONE';
+        
+        // لو التوست شغال عندك، شغله هنا
+        if (this.toastService) {
+          this.toastService.show('Removed from friends', 'success');
+        }
+        
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.error('Error unfriending user:', err)
     });
   }
 }
