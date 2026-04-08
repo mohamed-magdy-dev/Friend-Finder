@@ -157,21 +157,26 @@ createPost() {
 
  
   toggleComments(post: any) {
-    
     post.showComments = !post.showComments;
-    this.cdr.detectChanges(); 
 
     if (post.showComments && !post.commentsList) {
+      post.commentsList = []; 
+
+      // التعديل هنا: استخدمنا commentsService
+      // (ملاحظة: لو الدالة عندك في السيرفس مسمهاش getComments، غيرها للاسم الصح بتاعك)
       this.commentsService.getCommentsByPostId(post.id).subscribe({
-        next: (res) => {
-          post.commentsList = res;
+        next: (comments: any) => {
+          post.commentsList = comments;
           this.cdr.detectChanges(); 
         },
-        error: (err) => console.error('Error fetching comments', err)
+        error: (err: any) => {
+          console.error('Error fetching comments:', err);
+        }
       });
+    } else {
+      this.cdr.detectChanges();
     }
   }
-
 
   loadPosts() {
     this.isLoading = true;

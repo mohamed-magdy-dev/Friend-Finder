@@ -63,7 +63,8 @@ public class CommentsService {
                 comment.getContent(),
                 comment.getUser().getFullName(),
                 comment.getUser().getEmail(),
-                comment.getCreatedAt()
+                comment.getCreatedAt(),
+                comment.getUser().getProfilePictureUrl()
         );
     }
 }

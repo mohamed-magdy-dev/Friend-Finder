@@ -4,7 +4,8 @@ import com.project._5.Friend_Finder.dto.PostRequestDto;
 import com.project._5.Friend_Finder.dto.PostResponseDto;
 import com.project._5.Friend_Finder.entity.Post;
 import com.project._5.Friend_Finder.entity.User;
-import com.project._5.Friend_Finder.repository.PostLikesRepository; // الريبو بتاعك
+import com.project._5.Friend_Finder.repository.CommentsRepository;
+import com.project._5.Friend_Finder.repository.PostLikesRepository;
 import com.project._5.Friend_Finder.repository.PostRepository;
 import com.project._5.Friend_Finder.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ public class PostService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final PostLikesRepository postLikesRepository;
+    private final CommentsRepository commentsRepository;
 
     // create post
     public PostResponseDto createPost(PostRequestDto request, String userEmail) {
@@ -40,8 +42,7 @@ public class PostService {
 
     // method for bringing the posts
     public Page<PostResponseDto> getAllPosts(int page, int size, String userEmail) {
-      // bring the user that is opening the page now
-
+        // bring the user that is opening the page now
         User currentUser = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -50,29 +51,6 @@ public class PostService {
 
         // sending the current user to convert method to check if he liked (pressed like) or not
         return postsPage.map(post -> mapToDto(post, currentUser));
-    }
-
-    // method of  smart switching (dto stuff!)
-    private PostResponseDto mapToDto(Post post, User currentUser) {
-        // we count the likes from the database
-        long likeCount = postLikesRepository.countByPost(post);
-
-        // asking the DB if user currently liked the video?
-        boolean isLiked = postLikesRepository.findByPostAndUser(post, currentUser).isPresent();
-
-        return new PostResponseDto(
-                post.getId(),
-                post.getContent(),
-                post.getMediaUrl(),
-                post.getMediaType(),
-                post.getCreatedAt(),
-                post.getUser().getId(),
-                post.getUser().getFullName(),
-                post.getUser().getEmail(),
-                post.getUser().getProfilePictureUrl(),
-                likeCount, // added counts (for like)
-                isLiked    // added this
-        );
     }
 
     /**
@@ -105,5 +83,33 @@ public class PostService {
 
         postRepository.delete(post);
         return "Post deleted successfully.";
+    }
+
+    // method of smart switching (dto stuff!)
+    private PostResponseDto mapToDto(Post post, User currentUser) {
+        // 1. We count the likes from the database
+        long likeCount = postLikesRepository.countByPost(post);
+
+        // 2. Asking the DB if user currently liked the video?
+        boolean isLiked = postLikesRepository.findByPostAndUser(post, currentUser).isPresent();
+
+        // 3. We count the comments for this post
+        Integer commentsCount = commentsRepository.countByPostId(post.getId());
+
+        // 4. Return everything, including the new commentCount
+        return new PostResponseDto(
+                post.getId(),
+                post.getContent(),
+                post.getMediaUrl(),
+                post.getMediaType(),
+                post.getCreatedAt(),
+                post.getUser().getId(),
+                post.getUser().getFullName(),
+                post.getUser().getEmail(),
+                post.getUser().getProfilePictureUrl(),
+                likeCount,
+                isLiked,
+                commentsCount
+        );
     }
 }

@@ -153,12 +153,20 @@
         </div>
 
         <div class="ff-card p-2 ff-anim ff-d1">
-          <nav class="d-flex flex-column gap-1">
-            <a class="ff-nav-link active" routerLink="/home"><span class="ff-nav-icon"><i class="bi bi-house-door-fill"></i></span> Home</a>
-            <a class="ff-nav-link" routerLink="/friend-requests"><span class="ff-nav-icon"><i class="bi bi-people-fill"></i></span> Friends</a>
-            <a class="ff-nav-link"><span class="ff-nav-icon"><i class="bi bi-clock-history"></i></span> Timeline</a>
-            <a class="ff-nav-link"><span class="ff-nav-icon"><i class="bi bi-info-circle-fill"></i></span> About</a>
-          </nav>
+        <nav class="d-flex flex-column gap-1">
+            <a class="ff-nav-link active" routerLink="/home">
+              <span class="ff-nav-icon"><i class="bi bi-house-door-fill"></i></span> Home
+            </a>
+            
+            <a class="ff-nav-link" routerLink="/friends">
+              <span class="ff-nav-icon"><i class="bi bi-people-fill"></i></span> Friends
+            </a>
+            
+            <a class="ff-nav-link" [routerLink]="['/profile', currentUserId]">
+              <span class="ff-nav-icon"><i class="bi bi-clock-history"></i></span> My Timeline
+            </a>
+            
+            </nav>
         </div>
       </aside>
 
@@ -243,16 +251,16 @@
                 <i class="bi bi-hand-thumbs-up-fill"></i>
                 <span style="font-size:.82rem;">Like</span>
                 <span class="ff-count">{{ post.likeCount || 0 }}</span>
-              </button>
-              
-              <button class="ff-reaction-btn" 
+          </button>
+                            
+                           <button class="ff-reaction-btn" 
                       [class.ff-commented]="post.showComments"
                       (click)="toggleComments(post)">
                 <i class="bi bi-chat-fill"></i>
                 <span style="font-size:.82rem;">Comment</span>
+                <span class="ff-count">{{ post.commentsCount || 0 }}</span>
               </button>
             </div>
-
             @if (post.showComments) {
               <div class="ff-comments-section mt-3 pt-3" style="border-top: 1px solid var(--ff-clr-border);">
                 @for (comment of post.commentsList; track comment.id) {

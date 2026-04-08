@@ -14,4 +14,5 @@ public class CommentsResponseDto {
     private String authorName;
     private String authorEmail;
     private LocalDateTime createdAt;
+    private String authorProfilePictureUrl;
 }

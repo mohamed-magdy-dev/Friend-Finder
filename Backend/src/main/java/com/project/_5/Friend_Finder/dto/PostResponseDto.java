@@ -26,4 +26,6 @@ public class PostResponseDto {
     @JsonProperty("likeCount")
     private long likeCount;
     private Boolean isLiked;
+    // fixing the comments bug
+    private Integer commentsCount; // i will make it count the comments from here first
 }
