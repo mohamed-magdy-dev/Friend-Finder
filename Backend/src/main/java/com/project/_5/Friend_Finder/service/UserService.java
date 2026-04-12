@@ -6,21 +6,20 @@ import com.project._5.Friend_Finder.dto.UserResponseDto;
 import com.project._5.Friend_Finder.entity.Friendship;
 import com.project._5.Friend_Finder.entity.User;
 import com.project._5.Friend_Finder.repository.FriendshipRepository;
-import com.project._5.Friend_Finder.repository.PostRepository; // <== ضفنا ده هنا
+import com.project._5.Friend_Finder.repository.PostRepository;
 import com.project._5.Friend_Finder.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
 import org.springframework.web.multipart.MultipartFile;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.UUID;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -31,8 +30,14 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final FriendshipRepository friendshipRepository;
-    private final PostRepository postRepository; // <== عرفناه هنا علشان نستخدمه في العد
+    private final PostRepository postRepository;
+    private final String UPLOAD_DIR = "uploads/images/";
 
+    /**
+     * Retrieves all users registered in the system.
+     *
+     * @return List of all users
+     */
     public List<UserResponseDto> getAllUsers() {
         List<User> users = userRepository.findAll();
         return users.stream()
@@ -40,6 +45,13 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Generates a list of suggested users to follow or add as friends.
+     * Excludes the current user and users they are already friends with.
+     *
+     * @param currentUserEmail the email of the current user
+     * @return List of suggested users
+     */
     public List<UserResponseDto> getSuggestedUsers(String currentUserEmail) {
         User currentUser = userRepository.findByEmail(currentUserEmail)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -62,7 +74,13 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
-    // ===================== USER PROFILE (مع العدادات) =====================
+    /**
+     * Retrieves the profile information of a target user, including friendship status and statistics.
+     *
+     * @param targetUserId     the ID of the profile owner
+     * @param currentUserEmail the email of the user viewing the profile
+     * @return Complete UserProfileDto
+     */
     public UserProfileDto getUserProfile(Long targetUserId, String currentUserEmail) {
         User currentUser = userRepository.findByEmail(currentUserEmail)
                 .orElseThrow(() -> new RuntimeException("Current user not found"));
@@ -85,14 +103,10 @@ public class UserService {
             }
         }
 
-        // 1. حساب عدد البوستات
         Integer postsCount = postRepository.countByUser(targetUser);
-
-        // 2. حساب عدد الأصدقاء (في الاتجاهين)
         Integer friendsCount = friendshipRepository.countBySenderAndStatus(targetUser, "ACCEPTED") +
                 friendshipRepository.countByReceiverAndStatus(targetUser, "ACCEPTED");
 
-        // 3. إرجاع الـ DTO بكل البيانات الجديدة
         return new UserProfileDto(
                 targetUser.getId(),
                 targetUser.getFullName(),
@@ -102,11 +116,18 @@ public class UserService {
                 targetUser.getCoverPictureUrl(),
                 targetUser.getBirthDate(),
                 status,
-                postsCount, // <== ضفنا عدد البوستات
-                friendsCount // <== ضفنا عدد الأصدقاء
+                postsCount,
+                friendsCount
         );
     }
 
+    /**
+     * Searches for users by their full name (case-insensitive).
+     *
+     * @param name             the search query
+     * @param currentUserEmail the email of the user performing the search
+     * @return List of matching users
+     */
     public List<UserResponseDto> searchUsersByName(String name, String currentUserEmail) {
         List<User> matchedUsers = userRepository.findTop10ByFullNameContainingIgnoreCase(name);
         return matchedUsers.stream()
@@ -115,22 +136,32 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Retrieves full paginated search results for users.
+     */
     public Page<UserResponseDto> getFullSearchResults(String name, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<User> usersPage = userRepository.findByFullNameContainingIgnoreCase(name, pageable);
         return usersPage.map(user -> new UserResponseDto(user.getId(), user.getFullName(), user.getEmail()));
     }
 
-    private final String UPLOAD_DIR = "uploads/images/";
-
+    /**
+     * Uploads and updates the user's profile picture.
+     */
     public String uploadProfilePicture(MultipartFile file, String email) {
         return saveFileAndUpdateUser(file, email, true);
     }
 
+    /**
+     * Uploads and updates the user's cover picture.
+     */
     public String uploadCoverPicture(MultipartFile file, String email) {
         return saveFileAndUpdateUser(file, email, false);
     }
 
+    /**
+     * Helper method to save files locally and update the corresponding URL in the database.
+     */
     private String saveFileAndUpdateUser(MultipartFile file, String email, boolean isProfilePic) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -167,6 +198,9 @@ public class UserService {
         }
     }
 
+    /**
+     * Updates general profile details (Name, Bio, BirthDate).
+     */
     public UserProfileDto updateUserProfile(String email, ProfileUpdateRequestDto request) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));

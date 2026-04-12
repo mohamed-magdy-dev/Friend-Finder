@@ -23,7 +23,13 @@ public class PostService {
     private final PostLikesRepository postLikesRepository;
     private final CommentsRepository commentsRepository;
 
-    // create post
+    /**
+     * Creates a new post for the currently authenticated user.
+     *
+     * @param request   the post payload containing content and media details
+     * @param userEmail the email of the author
+     * @return The created Post wrapped in a Response DTO
+     */
     public PostResponseDto createPost(PostRequestDto request, String userEmail) {
         User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -35,29 +41,37 @@ public class PostService {
         post.setUser(user);
 
         Post savedPost = postRepository.save(post);
-
-        // sending current user to dto
         return mapToDto(savedPost, user);
     }
 
-    // method for bringing the posts
+    /**
+     * Retrieves a paginated list of all posts for the global feed.
+     *
+     * @param page      the page number
+     * @param size      the number of records per page
+     * @param userEmail the email of the current viewer (used for calculating 'isLiked' status)
+     * @return Paginated list of posts
+     */
     public Page<PostResponseDto> getAllPosts(int page, int size, String userEmail) {
-        // bring the user that is opening the page now
         User currentUser = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         Pageable pageable = PageRequest.of(page, size);
         Page<Post> postsPage = postRepository.findAllByOrderByCreatedAtDesc(pageable);
 
-        // sending the current user to convert method to check if he liked (pressed like) or not
         return postsPage.map(post -> mapToDto(post, currentUser));
     }
 
     /**
      * Retrieves a paginated list of posts authored by a specific user.
+     *
+     * @param userId           the ID of the post author
+     * @param page             the page number
+     * @param size             the number of records per page
+     * @param currentUserEmail the email of the viewer
+     * @return Paginated list of user-specific posts
      */
     public Page<PostResponseDto> getUserPosts(Long userId, int page, int size, String currentUserEmail) {
-
         User targetUser = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Target user not found"));
 
@@ -65,15 +79,19 @@ public class PostService {
                 .orElseThrow(() -> new RuntimeException("Current user not found"));
 
         Pageable pageable = PageRequest.of(page, size);
-
         Page<Post> userPosts = postRepository.findByUserOrderByCreatedAtDesc(targetUser, pageable);
 
         return userPosts.map(post -> mapToDto(post, currentUser));
     }
 
-    // deleting posts
+    /**
+     * Deletes a specific post. Requires the user to be the original author.
+     *
+     * @param postId    the ID of the post to delete
+     * @param userEmail the email of the user attempting deletion
+     * @return Success message
+     */
     public String deletePost(Long postId, String userEmail) {
-
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("Post not found"));
 
@@ -85,18 +103,19 @@ public class PostService {
         return "Post deleted successfully.";
     }
 
-    // method of smart switching (dto stuff!)
+    /**
+     * Helper method to map a Post entity to a PostResponseDto.
+     * Dynamically calculates likes, comments, and the current user's interaction state.
+     *
+     * @param post        the Post entity
+     * @param currentUser the user currently viewing the post
+     * @return Mapped DTO
+     */
     private PostResponseDto mapToDto(Post post, User currentUser) {
-        // 1. We count the likes from the database
         long likeCount = postLikesRepository.countByPost(post);
-
-        // 2. Asking the DB if user currently liked the video?
         boolean isLiked = postLikesRepository.findByPostAndUser(post, currentUser).isPresent();
-
-        // 3. We count the comments for this post
         Integer commentsCount = commentsRepository.countByPostId(post.getId());
 
-        // 4. Return everything, including the new commentCount
         return new PostResponseDto(
                 post.getId(),
                 post.getContent(),

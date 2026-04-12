@@ -24,10 +24,14 @@ public class FriendshipService {
     private final NotificationRepository notificationRepository;
 
     /**
-     * Sends a friend request from the current user to another user.
+     * Sends a friend request from the current user to a target user.
+     * Prevents self-requests and duplicate requests.
+     *
+     * @param senderEmail the email of the user sending the request
+     * @param receiverId  the ID of the user receiving the request
+     * @return Success message
      */
     public String sendFriendRequest(String senderEmail, Long receiverId) {
-
         User sender = userRepository.findByEmail(senderEmail)
                 .orElseThrow(() -> new RuntimeException("Sender not found"));
 
@@ -38,7 +42,6 @@ public class FriendshipService {
             throw new RuntimeException("You cannot send a friend request to yourself!");
         }
 
-        // Check if there's already a pending or accepted request in either direction
         Optional<Friendship> existingRequest = friendshipRepository.findBySenderAndReceiver(sender, receiver);
         Optional<Friendship> reverseRequest = friendshipRepository.findBySenderAndReceiver(receiver, sender);
 
@@ -52,7 +55,6 @@ public class FriendshipService {
         friendship.setStatus("PENDING");
         friendshipRepository.save(friendship);
 
-        // Create a notification for the receiver
         Notification notification = new Notification();
         notification.setUser(receiver);
         notification.setMessage(sender.getFullName() + " sent you a friend request.");
@@ -62,8 +64,11 @@ public class FriendshipService {
     }
 
     /**
-     * Cancels a friend request sent by mistake.
-     * It also cleans up the notification sent to the receiver to avoid confusion.
+     * Cancels a pending friend request and removes the associated notification.
+     *
+     * @param senderEmail the email of the user who sent the request
+     * @param receiverId  the ID of the receiver
+     * @return Success message
      */
     public String cancelFriendRequest(String senderEmail, Long receiverId) {
         User sender = userRepository.findByEmail(senderEmail)
@@ -77,7 +82,6 @@ public class FriendshipService {
 
         friendshipRepository.delete(friendship);
 
-        // Clean up the notification associated with this request
         String expectedMessage = sender.getFullName() + " sent you a friend request.";
         List<Notification> notifications = notificationRepository.findByUserAndMessage(receiver, expectedMessage);
         notificationRepository.deleteAll(notifications);
@@ -86,7 +90,11 @@ public class FriendshipService {
     }
 
     /**
-     * Accepts a pending friend request and creates a notification for the sender.
+     * Accepts a pending friend request and notifies the sender.
+     *
+     * @param requestId     the ID of the friendship request
+     * @param receiverEmail the email of the user accepting the request
+     * @return Success message
      */
     public String acceptFriendRequest(Long requestId, String receiverEmail) {
         User receiver = userRepository.findByEmail(receiverEmail)
@@ -95,16 +103,13 @@ public class FriendshipService {
         Friendship friendship = friendshipRepository.findById(requestId)
                 .orElseThrow(() -> new RuntimeException("Friend request not found"));
 
-        // Security check: Ensure the current user is the actual receiver of the request
         if (!friendship.getReceiver().getId().equals(receiver.getId())) {
             throw new RuntimeException("Unauthorized action");
         }
 
-        // Update status to accepted
         friendship.setStatus("ACCEPTED");
         friendshipRepository.save(friendship);
 
-        // Notify the sender that their request was accepted
         Notification notification = new Notification();
         notification.setUser(friendship.getSender());
         notification.setMessage(receiver.getFullName() + " accepted your friend request.");
@@ -114,7 +119,11 @@ public class FriendshipService {
     }
 
     /**
-     * Rejects (deletes) a pending friend request.
+     * Rejects and deletes a pending friend request.
+     *
+     * @param requestId     the ID of the friendship request
+     * @param receiverEmail the email of the user rejecting the request
+     * @return Success message
      */
     public String rejectFriendRequest(Long requestId, String receiverEmail) {
         User receiver = userRepository.findByEmail(receiverEmail)
@@ -123,28 +132,27 @@ public class FriendshipService {
         Friendship friendship = friendshipRepository.findById(requestId)
                 .orElseThrow(() -> new RuntimeException("Friend request not found"));
 
-        // Security check: Ensure the current user is the actual receiver
         if (!friendship.getReceiver().getId().equals(receiver.getId())) {
             throw new RuntimeException("Unauthorized action");
         }
 
-        // Delete the request entirely
         friendshipRepository.delete(friendship);
 
         return "Friend request rejected successfully!";
     }
 
     /**
-     * Retrieves a list of pending friend requests for the current logged-in user.
+     * Retrieves all pending friend requests for the logged-in user.
+     *
+     * @param receiverEmail the email of the current user
+     * @return List of pending friend requests
      */
     public List<FriendRequestsDto> getPendingRequests(String receiverEmail) {
         User receiver = userRepository.findByEmail(receiverEmail)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // Fetch pending requests from the database
         List<Friendship> pendingRequests = friendshipRepository.findByReceiverAndStatus(receiver, "PENDING");
 
-        // Map the entities to DTOs
         return pendingRequests.stream()
                 .map(request -> new FriendRequestsDto(
                         request.getId(),
@@ -156,8 +164,12 @@ public class FriendshipService {
     }
 
     /**
-     * Removes an existing friendship (Unfriend).
-     * It checks both directions since either user could have initiated the friendship.
+     * Removes an existing accepted friendship (Unfriend).
+     * Checks both directions to locate the friendship record.
+     *
+     * @param currentUserEmail the email of the user initiating the unfriend action
+     * @param friendId         the ID of the friend to be removed
+     * @return Success message
      */
     public String unfriend(String currentUserEmail, Long friendId) {
         User currentUser = userRepository.findByEmail(currentUserEmail)
@@ -166,13 +178,11 @@ public class FriendshipService {
         User friend = userRepository.findById(friendId)
                 .orElseThrow(() -> new RuntimeException("Friend not found"));
 
-        // We must check both directions to find the friendship record
         Optional<Friendship> friendship = friendshipRepository.findBySenderAndReceiver(currentUser, friend);
         if (friendship.isEmpty()) {
             friendship = friendshipRepository.findBySenderAndReceiver(friend, currentUser);
         }
 
-        // If a friendship exists and is accepted, delete it
         if (friendship.isPresent() && "ACCEPTED".equals(friendship.get().getStatus())) {
             friendshipRepository.delete(friendship.get());
             return "Unfriended successfully.";
@@ -180,7 +190,13 @@ public class FriendshipService {
             throw new RuntimeException("You are not friends with this user.");
         }
     }
-    // دالة جلب قائمة الأصدقاء الفعليين
+
+    /**
+     * Retrieves a list of accepted friends for the current user.
+     *
+     * @param currentUserEmail the email of the current user
+     * @return List of friends
+     */
     public List<UserResponseDto> getMyFriends(String currentUserEmail) {
         User currentUser = userRepository.findByEmail(currentUserEmail)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -190,13 +206,8 @@ public class FriendshipService {
         return friendships.stream()
                 .map(f -> {
                     User friend = f.getSender().getId().equals(currentUser.getId()) ? f.getReceiver() : f.getSender();
-
-                    // بنعمل الكائن بالـ 3 حاجات الأساسية بس
                     UserResponseDto dto = new UserResponseDto(friend.getId(), friend.getFullName(), friend.getEmail());
-
-                    // وبنضيف الصورة بالـ Setter علشان منضربش الكونستراكتور
                     dto.setProfilePictureUrl(friend.getProfilePictureUrl());
-
                     return dto;
                 })
                 .collect(Collectors.toList());
