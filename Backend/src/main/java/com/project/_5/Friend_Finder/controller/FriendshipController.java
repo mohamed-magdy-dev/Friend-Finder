@@ -1,6 +1,7 @@
 package com.project._5.Friend_Finder.controller;
 
 import com.project._5.Friend_Finder.dto.FriendRequestsDto;
+import com.project._5.Friend_Finder.dto.UserResponseDto;
 import com.project._5.Friend_Finder.service.FriendshipService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -65,4 +66,9 @@ public class FriendshipController {
         return ResponseEntity.ok(result);
     }
 
+    @GetMapping("/my-friends")
+    public ResponseEntity<List<UserResponseDto>> getMyFriends(Principal principal) {
+        List<UserResponseDto> friends = friendshipService.getMyFriends(principal.getName());
+        return ResponseEntity.ok(friends);
+    }
 }

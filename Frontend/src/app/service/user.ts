@@ -138,4 +138,11 @@ export class UserService {
       responseType: 'text' 
     });
   }
+
+  // Friends page:
+  getMyFriends() {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return this.http.get<any[]>('http://localhost:8080/api/friends/my-friends', { headers });
+  }
 }

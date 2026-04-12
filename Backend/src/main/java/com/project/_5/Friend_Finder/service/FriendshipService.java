@@ -1,6 +1,7 @@
 package com.project._5.Friend_Finder.service;
 
 import com.project._5.Friend_Finder.dto.FriendRequestsDto;
+import com.project._5.Friend_Finder.dto.UserResponseDto;
 import com.project._5.Friend_Finder.entity.Friendship;
 import com.project._5.Friend_Finder.entity.Notification;
 import com.project._5.Friend_Finder.entity.User;
@@ -178,5 +179,26 @@ public class FriendshipService {
         } else {
             throw new RuntimeException("You are not friends with this user.");
         }
+    }
+    // دالة جلب قائمة الأصدقاء الفعليين
+    public List<UserResponseDto> getMyFriends(String currentUserEmail) {
+        User currentUser = userRepository.findByEmail(currentUserEmail)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        List<Friendship> friendships = friendshipRepository.findAcceptedFriendships(currentUser);
+
+        return friendships.stream()
+                .map(f -> {
+                    User friend = f.getSender().getId().equals(currentUser.getId()) ? f.getReceiver() : f.getSender();
+
+                    // بنعمل الكائن بالـ 3 حاجات الأساسية بس
+                    UserResponseDto dto = new UserResponseDto(friend.getId(), friend.getFullName(), friend.getEmail());
+
+                    // وبنضيف الصورة بالـ Setter علشان منضربش الكونستراكتور
+                    dto.setProfilePictureUrl(friend.getProfilePictureUrl());
+
+                    return dto;
+                })
+                .collect(Collectors.toList());
     }
 }

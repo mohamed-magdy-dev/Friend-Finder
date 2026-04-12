@@ -3,7 +3,8 @@ import { AuthContainerComponent } from './auth/auth-container/auth-container';
 import { Home } from './components/home/home';
 import { FriendRequests } from './components/friend-requests/friend-requests';
 import { UserProfile } from './components/user-profile/user-profile'; 
-import { SearchResults } from './components/search-results/search-results'; // <-- ADD THIS
+import { SearchResults } from './components/search-results/search-results';
+import { FriendsComponent } from './components/friends/friends';
 
 export const routes: Routes = [
   { path: 'login', component: AuthContainerComponent },
@@ -12,5 +13,6 @@ export const routes: Routes = [
   { path: 'friend-requests', component: FriendRequests },
   // Dynamic route for user profile ... 
   { path: 'profile/:id', component: UserProfile } ,
-  { path: 'search/:query', component: SearchResults }
+  { path: 'search/:query', component: SearchResults },
+  { path: 'friends', component: FriendsComponent },
 ];

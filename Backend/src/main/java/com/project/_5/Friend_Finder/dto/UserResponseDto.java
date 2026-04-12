@@ -12,7 +12,7 @@ public class UserResponseDto {
     private String fullName;
     private String email;
     private boolean isRequestSent;
-
+    private String profilePictureUrl;
     // this constructor thing will solve my ever lasting problem
     // since it only needs 3 fields only so it works now
     public UserResponseDto(Long id, String fullName, String email) {
@@ -20,5 +20,13 @@ public class UserResponseDto {
         this.fullName = fullName;
         this.email = email;
         // isRequestSent is false by default so...
+    }
+
+    //for suggested friends
+    public UserResponseDto(Long id, String fullName, String email, Boolean isRequestSent) {
+        this.id = id;
+        this.fullName = fullName;
+        this.email = email;
+        this.isRequestSent = isRequestSent;
     }
 }
