@@ -3,6 +3,7 @@ package com.project._5.Friend_Finder.controller;
 import com.project._5.Friend_Finder.dto.UserProfileDto;
 import com.project._5.Friend_Finder.dto.UserResponseDto;
 import com.project._5.Friend_Finder.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -107,7 +108,7 @@ public class UserController {
 
     // ===================== UPDATE PROFILE ENDPOINT =====================
     @PutMapping("/profile/update")
-    public ResponseEntity<UserProfileDto> updateProfile(@RequestBody com.project._5.Friend_Finder.dto.ProfileUpdateRequestDto request, Principal principal) {
+    public ResponseEntity<UserProfileDto> updateProfile(@Valid @RequestBody com.project._5.Friend_Finder.dto.ProfileUpdateRequestDto request, Principal principal) {
         UserProfileDto updatedProfile = userService.updateUserProfile(principal.getName(), request);
         return ResponseEntity.ok(updatedProfile);
     }

@@ -1,5 +1,4 @@
 <div class="ff-page-wrap" style="background-color: #f4f6f8; min-height: 100vh; padding-bottom: 2rem;">
-  
   <nav class="navbar bg-white px-3 px-lg-4 mb-4 shadow-sm sticky-top" style="border-bottom: 1px solid #eaeaea; z-index: 1000;">
     <div class="container-xl d-flex align-items-center w-100">
       <a routerLink="/home" class="btn btn-light text-secondary fw-bold rounded-pill d-inline-flex align-items-center px-4 py-2" style="transition: all 0.2s ease;">
@@ -14,14 +13,11 @@
 
         @if (profileData) {
           <div class="ff-card mb-4 shadow-sm position-relative bg-white" style="border-radius: 16px; overflow: hidden; border: 1px solid #e0e4e8;">
-            
             <div class="position-relative" style="height: 220px; width: 100%; transition: all 0.3s ease;"
                  [style.background]="profileData.coverPictureUrl ? 'url(\'' + profileData.coverPictureUrl + '\') center/cover' : 'linear-gradient(135deg, hsl(' + ((profileData.id * 137) % 360) + ', 70%, 60%), hsl(' + ((profileData.id * 250) % 360) + ', 70%, 30%))'">
-                 
                  <input type="file" #coverInput (change)="onCoverSelected($event)" accept="image/*" class="d-none">
-                 
                  @if (profileData.friendshipStatus === 'SELF') {
-                   <button class="btn btn-dark btn-sm position-absolute top-0 end-0 m-3 shadow-sm d-flex align-items-center" 
+                   <button class="btn btn-dark btn-sm position-absolute top-0 end-0 m-3 shadow-sm d-flex align-items-center"
                            style="background-color: rgba(0,0,0,0.6); border: none; border-radius: 8px; backdrop-filter: blur(4px);"
                            (click)="coverInput.click()"
                            [disabled]="isUploadingCover">
@@ -33,18 +29,15 @@
                    </button>
                  }
             </div>
-            
             <div class="text-center position-relative" style="margin-top: -70px; z-index: 2;">
-              <div class="mx-auto shadow d-flex align-items-center justify-content-center text-white fw-bold position-relative ff-anim bg-white" 
+              <div class="mx-auto shadow d-flex align-items-center justify-content-center text-white fw-bold position-relative ff-anim bg-white"
                    [style.background]="profileData.profilePictureUrl ? 'url(\'' + profileData.profilePictureUrl + '\') center/cover' : 'hsl(' + ((profileData.fullName.charCodeAt(0) || 65) * 137 % 360) + ',70%,52%)'"
                    style="width: 140px; height: 140px; font-size: 3.5rem; border: 4px solid white; border-radius: 50%;">
-                
                 {{ !profileData.profilePictureUrl ? profileData.fullName.charAt(0).toUpperCase() : '' }}
-                
                 <input type="file" #profilePicInput (change)="onProfilePicSelected($event)" accept="image/*" class="d-none">
 
                 @if (profileData.friendshipStatus === 'SELF') {
-                  <button class="btn btn-light rounded-circle position-absolute bottom-0 end-0 shadow border d-flex align-items-center justify-content-center text-dark" 
+                  <button class="btn btn-light rounded-circle position-absolute bottom-0 end-0 shadow border d-flex align-items-center justify-content-center text-dark"
                           style="width: 38px; height: 38px; padding: 0; transform: translate(-5px, -5px); transition: all 0.2s;"
                           (click)="profilePicInput.click()"
                           [disabled]="isUploadingProfile">
@@ -57,11 +50,10 @@
                 }
               </div>
             </div>
-            
             <div class="text-center p-4 pt-3">
               <h3 class="fw-bold mb-0" style="color: #1a1a1a;">{{ profileData.fullName }}</h3>
-              
-              <p class="text-muted mb-3" style="font-size: 0.95rem;">&#64;{{ profileData.fullName.toLowerCase().replace(' ', '') }}</p>
+              <!-- handle is built in the component (profileHandle getter) so ALL spaces get stripped, not just the first one -->
+              <p class="text-muted mb-3" style="font-size: 0.95rem;">&#64;{{ profileHandle }}</p>
 
               @if (profileData.bio) {
                 <p class="mb-3 px-4" style="color: #4a4a4a; font-size: 1rem; line-height: 1.5;">{{ profileData.bio }}</p>
@@ -77,7 +69,6 @@
               </div>
 
               <div class="d-flex justify-content-center gap-2 pt-4" style="border-top: 1px solid #f0f0f0;">
-                
                 @if (profileData.friendshipStatus === 'NONE') {
                   <button class="btn btn-primary px-4 py-2 fw-bold d-flex align-items-center rounded-pill" (click)="sendRequest()">
                     <i class="bi bi-person-plus-fill me-2 fs-5"></i> Add Friend
@@ -111,7 +102,6 @@
             </div>
           </div>
         }
-        
           <div class="d-flex align-items-center mb-4 mt-4 px-2">
             <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 42px; height: 42px;">
               <i class="bi bi-card-text fs-5"></i>
@@ -136,14 +126,11 @@
 
         @for (post of userPosts; track post.id) {
           <div class="ff-card ff-card-post p-4 mb-3 shadow-sm bg-white" style="border-radius: 16px; border: 1px solid #e0e4e8;">
-            
             <div class="d-flex align-items-center gap-3 mb-3">
-              <div class="ff-post-avatar text-white d-flex align-items-center justify-content-center fw-bold shadow-sm" 
+              <div class="ff-post-avatar text-white d-flex align-items-center justify-content-center fw-bold shadow-sm"
                    [style.background]="post?.authorProfilePictureUrl ? 'url(\'' + post.authorProfilePictureUrl + '\') center/cover' : 'hsl(' + ((post?.authorName?.charCodeAt(0) || 65) * 137 % 360) + ',55%,48%)'"
                    style="width: 48px; height: 48px; border-radius: 50%; font-size: 1.2rem; border: 1px solid #eee;">
-                
                 {{ !post?.authorProfilePictureUrl ? (post?.authorName?.charAt(0)?.toUpperCase() || 'U') : '' }}
-                
               </div>
               <div class="flex-grow-1">
                 <p class="ff-post-author mb-0 fw-bold" style="color: #1a1a1a; font-size: 1.05rem;">{{ post?.authorName || 'Unknown User' }}</p>
@@ -156,8 +143,8 @@
             <p class="mb-4 mt-2" style="color: #333; font-size: 1.05rem; line-height: 1.6;">{{ post?.content }}</p>
 
             <div class="d-flex gap-3 pt-3" style="border-top: 1px solid #f0f0f0;">
-              <button class="btn btn-sm text-decoration-none fw-bold d-flex align-items-center rounded-pill px-3 py-2" 
-                      [ngClass]="post.isLiked ? 'btn-primary text-white' : 'btn-light text-secondary border'" 
+              <button class="btn btn-sm text-decoration-none fw-bold d-flex align-items-center rounded-pill px-3 py-2"
+                      [ngClass]="post.isLiked ? 'btn-primary text-white' : 'btn-light text-secondary border'"
                       (click)="toggleLike(post)"
                       style="transition: all 0.2s;">
                 <i class="bi fs-6 me-2" [ngClass]="post.isLiked ? 'bi-hand-thumbs-up-fill' : 'bi-hand-thumbs-up'"></i>
@@ -177,39 +164,51 @@
 
 @if (isEditModalOpen) {
   <div class="modal-backdrop fade show" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1040; background-color: rgba(0,0,0,0.5); backdrop-filter: blur(3px);"></div>
-  
   <div class="modal fade show" tabindex="-1" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1050; display: flex !important; align-items: center; justify-content: center;">
     <div class="modal-dialog w-100" style="max-width: 500px; margin: 0;">
       <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
-        
         <div class="modal-header border-bottom-0 pb-0 mt-2 mx-2">
           <h5 class="modal-title fw-bold" style="color: #1a1a1a;">Edit Profile</h5>
           <button type="button" class="btn-close shadow-none" (click)="closeEditModal()"></button>
         </div>
-        
         <div class="modal-body px-4">
           <div class="mb-3">
             <label class="form-label fw-bold text-muted small mb-1">Full Name <span class="text-danger">*</span></label>
-            <input type="text" class="form-control px-3 py-2" style="border-radius: 10px; background-color: #f8f9fa;" [(ngModel)]="editFormData.fullName" placeholder="Your full name">
+            <input type="text" class="form-control px-3 py-2" style="border-radius: 10px; background-color: #f8f9fa;"
+                   [(ngModel)]="editFormData.fullName"
+                   [maxlength]="FULL_NAME_MAX_LENGTH"
+                   placeholder="Your full name">
           </div>
-          
           <div class="mb-3">
             <label class="form-label fw-bold text-muted small mb-1">Bio</label>
-            <textarea class="form-control px-3 py-2" rows="3" style="border-radius: 10px; background-color: #f8f9fa;" [(ngModel)]="editFormData.bio" placeholder="Tell everyone a little about yourself..."></textarea>
+            <textarea class="form-control px-3 py-2" rows="3" style="border-radius: 10px; background-color: #f8f9fa;"
+                      [(ngModel)]="editFormData.bio"
+                      [maxlength]="BIO_MAX_LENGTH"
+                      placeholder="Tell everyone a little about yourself..."></textarea>
+            <!-- quick char counter so people aren't surprised when it stops accepting input -->
+            <div class="text-muted text-end" style="font-size: 0.75rem;">
+              {{ editFormData.bio?.length || 0 }}/{{ BIO_MAX_LENGTH }}
+            </div>
           </div>
-          
           <div class="mb-3">
             <label class="form-label fw-bold text-muted small mb-1">Birth Date</label>
-            <input type="date" class="form-control px-3 py-2" style="border-radius: 10px; background-color: #f8f9fa;" [(ngModel)]="editFormData.birthDate">
+            <!-- min/max keep the native date picker from offering silly dates in the first place -->
+            <input type="date" class="form-control px-3 py-2" style="border-radius: 10px; background-color: #f8f9fa;"
+                   [(ngModel)]="editFormData.birthDate"
+                   [min]="minBirthDate"
+                   [max]="maxBirthDate">
+            @if (editFormData.birthDate && !isBirthDateValid) {
+              <div class="text-danger mt-1" style="font-size: 0.8rem;">
+                Please enter a realistic birth date (you must be at least 13 years old).
+              </div>
+            }
           </div>
         </div>
-        
         <div class="modal-footer border-top-0 pt-0 pb-3 px-4 d-flex gap-2">
           <button type="button" class="btn btn-light rounded-pill px-4 fw-bold flex-grow-1" style="background-color: #f0f2f5;" (click)="closeEditModal()">Cancel</button>
-          
-          <button type="button" class="btn btn-primary rounded-pill px-4 fw-bold flex-grow-1" 
-                  (click)="submitProfileUpdate()" 
-                  [disabled]="isUpdatingProfile || !editFormData.fullName.trim()">
+          <button type="button" class="btn btn-primary rounded-pill px-4 fw-bold flex-grow-1"
+                  (click)="submitProfileUpdate()"
+                  [disabled]="isUpdatingProfile || !editFormData.fullName.trim() || !isBirthDateValid || isBioTooLong">
             @if (isUpdatingProfile) {
               <span class="spinner-border spinner-border-sm me-2"></span> Saving...
             } @else {
@@ -217,7 +216,6 @@
             }
           </button>
         </div>
-        
       </div>
     </div>
   </div>

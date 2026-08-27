@@ -12,4 +12,8 @@ import java.util.Optional;
 public interface PostLikesRepository extends JpaRepository<PostLike, Long> {
     Optional<PostLike> findByPostAndUser(Post post, User user);
     long countByPost(Post post);
+
+    // Interface to delete likes (for deleting post)
+    void deleteByPost(Post post);
+
 }

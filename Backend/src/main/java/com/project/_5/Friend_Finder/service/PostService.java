@@ -8,6 +8,7 @@ import com.project._5.Friend_Finder.repository.CommentsRepository;
 import com.project._5.Friend_Finder.repository.PostLikesRepository;
 import com.project._5.Friend_Finder.repository.PostRepository;
 import com.project._5.Friend_Finder.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -91,15 +92,24 @@ public class PostService {
      * @param userEmail the email of the user attempting deletion
      * @return Success message
      */
+    @Transactional //added transaction so that it can delete without giving us the "No EntityManager" error
     public String deletePost(Long postId, String userEmail) {
+
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("Post not found"));
 
+        // Make sure the current user owns the post
         if (!post.getUser().getEmail().equals(userEmail)) {
             throw new RuntimeException("Unauthorized: You can only delete your own posts.");
         }
 
+        // Delete child records first
+        commentsRepository.deleteByPost(post);
+        postLikesRepository.deleteByPost(post);
+
+        // Delete the parent post
         postRepository.delete(post);
+
         return "Post deleted successfully.";
     }
 
