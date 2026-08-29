@@ -1,5 +1,6 @@
 package com.project._5.Friend_Finder.controller;
 
+import com.project._5.Friend_Finder.dto.ActivityDto;
 import com.project._5.Friend_Finder.dto.UserProfileDto;
 import com.project._5.Friend_Finder.dto.UserResponseDto;
 import com.project._5.Friend_Finder.service.UserService;
@@ -8,7 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import com.project._5.Friend_Finder.dto.ActivityDto;
 import java.security.Principal;
 import java.util.List;
 
@@ -40,13 +41,17 @@ public class UserController {
         return ResponseEntity.ok(suggestions);
     }
 
-                           // user profile
+      // user profile
     @GetMapping("/profile/{userId}")
     public ResponseEntity<UserProfileDto> getUserProfile(@PathVariable Long userId, Principal principal) {
         UserProfileDto profile = userService.getUserProfile(userId, principal.getName());
         return ResponseEntity.ok(profile);
     }
-
+    // user activity
+    @GetMapping("/{userId}/activity")
+    public ResponseEntity<List<ActivityDto>> getUserActivity(@PathVariable Long userId) {
+        return ResponseEntity.ok(userService.getUserActivity(userId));
+    }
     // Search endpoint
     @GetMapping("/search")
     public ResponseEntity<List<UserResponseDto>> searchUsers(@RequestParam String name, Principal principal) {
@@ -73,7 +78,7 @@ public class UserController {
         return ResponseEntity.ok(fileUrl);
     }
 
-    // -----------
+    // ----------- Endpoint
     // Endpoint to upload a cover banner----------
     @PostMapping("/cover-picture")
     public ResponseEntity<String> uploadCoverPicture(@RequestParam("file") MultipartFile file, Principal principal) {

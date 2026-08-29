@@ -9,7 +9,7 @@
 
   <div class="container-xl py-2 px-3 px-lg-4">
     <div class="row justify-content-center">
-      <div class="col-lg-8 col-xl-7">
+      <div class="col-lg-8">
 
         @if (profileData) {
           <div class="ff-card mb-4 shadow-sm position-relative bg-white" style="border-radius: 16px; overflow: hidden; border: 1px solid #e0e4e8;">
@@ -158,6 +158,43 @@
         }
 
       </div>
+
+      <!-- Recent Activity sidebar - last 5 posts/comments/likes, newest first -->
+      <aside class="col-lg-4">
+        <div class="ff-card p-3 mb-3 shadow-sm bg-white" style="border-radius: 16px; border: 1px solid #e0e4e8; position: sticky; top: 90px;">
+          <p class="fw-bold mb-3" style="color: #1a1a1a; letter-spacing: -0.3px;">
+            <i class="bi bi-activity me-2 text-primary"></i> Recent Activity
+          </p>
+
+          @if (isLoadingActivity) {
+            <div class="text-center py-4">
+              <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+            </div>
+          }
+
+          @if (!isLoadingActivity && activities.length === 0) {
+            <p class="text-muted fst-italic mb-0" style="font-size: 0.85rem;">No activity yet.</p>
+          }
+
+          @if (!isLoadingActivity && activities.length > 0) {
+            <div class="d-flex flex-column gap-3">
+              @for (item of activities; track $index) {
+                <div class="d-flex align-items-start gap-2">
+                  <div class="d-flex align-items-center justify-content-center rounded-circle bg-primary bg-opacity-10 text-primary flex-shrink-0"
+                       style="width: 32px; height: 32px;">
+                    <i class="bi {{ getActivityIcon(item.type) }}" style="font-size: 0.85rem;"></i>
+                  </div>
+                  <div class="flex-grow-1" style="min-width: 0;">
+                    <p class="mb-0" style="font-size: 0.85rem; color: #333; line-height: 1.4;">{{ item.description }}</p>
+                    <span class="text-muted" style="font-size: 0.75rem;">{{ item.createdAt | date:'MMM d, h:mm a' }}</span>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </aside>
+
     </div>
   </div>
 </div>

@@ -22,6 +22,8 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
 
     // registering function (Register)
+    // The first user to register automatically becomes ADMIN, rest are USER
+    // Password is hashed (BCrypt) before saving - never stored as plain text
     public AuthResponse register(RegisterRequest request) {
         // making sure the email is not repeated or there before
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {

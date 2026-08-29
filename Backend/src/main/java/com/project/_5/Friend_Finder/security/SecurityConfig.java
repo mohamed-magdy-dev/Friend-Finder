@@ -27,6 +27,8 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthFilter;
 
+        // Defines which endpoints are public (no token needed) vs protected
+        // STATELESS = no session on server, every request must carry its own token
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http

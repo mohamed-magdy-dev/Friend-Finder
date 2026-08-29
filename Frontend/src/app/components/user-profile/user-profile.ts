@@ -32,6 +32,11 @@ export class UserProfile implements OnInit {
     birthDate: ''
   };
 
+  // recent activity sidebar - last 5 posts/comments/likes merged together,
+  // computed on the backend, we just display whatever it sends back
+  activities: any[] = [];
+  isLoadingActivity: boolean = true;
+
   // limits used across the edit form - keep these in sync with
   // whatever the backend ends up enforcing (right now it doesn't enforce any of this!)
   readonly BIO_MAX_LENGTH = 300;
@@ -55,6 +60,7 @@ export class UserProfile implements OnInit {
         this.userId = +idParam;
         this.loadProfile();
         this.loadUserPosts();
+        this.loadUserActivity();
       }
     });
   }
@@ -85,6 +91,34 @@ export class UserProfile implements OnInit {
         this.cdr.detectChanges();
       }
     });
+  }
+
+  // Fetch the merged post/comment/like activity feed for the sidebar
+  loadUserActivity() {
+    this.isLoadingActivity = true;
+    this.userService.getUserActivity(this.userId).subscribe({
+      next: (res: any[]) => {
+        this.activities = res || [];
+        this.isLoadingActivity = false;
+        this.cdr.detectChanges();
+      },
+      error: (err: any) => {
+        console.error('Error fetching user activity:', err);
+        this.isLoadingActivity = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  // small lookup so the template doesn't need a big @switch for icons
+  private readonly activityIcons: Record<string, string> = {
+    POST: 'bi-file-earmark-text-fill',
+    COMMENT: 'bi-chat-dots-fill',
+    LIKE: 'bi-hand-thumbs-up-fill'
+  };
+
+  getActivityIcon(type: string): string {
+    return this.activityIcons[type] || 'bi-clock-history';
   }
 
   // Turns a full name into a slug for the @handle under the name.

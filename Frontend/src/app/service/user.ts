@@ -126,6 +126,13 @@ export class UserService {
     return this.http.put<any>(`${this.apiUrl}/profile/update`, profileData, { headers });
   }
   
+  // User Activity 
+getUserActivity(userId: number): Observable<any> {
+  const token = localStorage.getItem('token');
+  const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
+  return this.http.get<any>(`${this.apiUrl}/${userId}/activity`, { headers });
+}
+
   // unfriend user
  unfriendUser(friendId: number) {
     const token = localStorage.getItem('token');

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -50,8 +50,12 @@ export class AuthContainerComponent {
     return this.passwordHasMinLength && this.passwordHasUppercase && this.passwordHasSpecialChar;
   }
 
+  // cdr is needed because this app doesn't use zone.js - every other
+  // component here calls detectChanges() after an async response for
+  // the same reason, so we're just matching that pattern
   constructor(private authService: AuthService,
-              private router: Router) {}
+              private router: Router,
+              private cdr: ChangeDetectorRef) {}
 
   switchTab(isSignUp: boolean) {
     this.isSignUpActive = isSignUp;
@@ -84,6 +88,7 @@ export class AuthContainerComponent {
 
         this.messageType = 'success';
         this.message = 'Login successful. Redirecting...';
+        this.cdr.detectChanges(); // show the success message right away, not after some random click
 
         setTimeout(() => {
           this.router.navigate(['/home']);
@@ -93,6 +98,7 @@ export class AuthContainerComponent {
         this.isSubmitting = false;
         this.messageType = 'error';
         this.message = err.error?.error || 'Invalid email or password.';
+        this.cdr.detectChanges(); // same here - this is what was "stuck" before
       }
     });
   }
@@ -126,6 +132,7 @@ export class AuthContainerComponent {
 
         this.messageType = 'success';
         this.message = 'Account created successfully. Redirecting...';
+        this.cdr.detectChanges();
 
         setTimeout(() => {
           this.router.navigate(['/home']);
@@ -135,6 +142,7 @@ export class AuthContainerComponent {
         this.isSubmitting = false;
         this.messageType = 'error';
         this.message = err.error?.error || 'Registration failed.';
+        this.cdr.detectChanges();
       }
     });
   }

@@ -42,7 +42,7 @@ public class JwtUtils {
     private Boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
     }
-
+    // generating the tokens
     public String generateToken(String email) {
         return Jwts.builder()
                 .setSubject(email)

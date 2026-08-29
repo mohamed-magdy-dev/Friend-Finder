@@ -18,6 +18,9 @@ import java.io.IOException;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
+    // This filter runs on EVERY request to check for a JWT token
+    // It reads the "Authorization: Bearer xxx" header, decodes the token,
+    // and puts the authenticated user into Spring's SecurityContext
 
     @Autowired
     private JwtUtils jwtUtils;

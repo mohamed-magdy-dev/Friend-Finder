@@ -105,32 +105,33 @@ toggleNotifications() {
       });
     }
   }
+    // Create Post .............................................................................
+    createPost() {
+      if (!this.newPostContent.trim()) return; // Validation
 
-createPost() {
-    if (!this.newPostContent.trim()) return; 
-
-    this.isPosting = true; 
-
-    const request = {
-      content: this.newPostContent,
-      mediaType: 'TEXT' 
-    };
-
-    this.postService.createPost(request).subscribe({
-      next: (res: any) => {
-        this.posts.unshift(res); 
-        
-        this.newPostContent = ''; 
-        this.isPosting = false;
-        
-        this.cdr.detectChanges();
-      },
-      error: (err: any) => {
-        console.error('Error creating post:', err);
-        this.isPosting = false;
-        this.cdr.detectChanges();
-      }
-    });}
+      //Loading State
+      this.isPosting = true; 
+      //Payload Preparation
+      const request = {
+        content: this.newPostContent,
+        mediaType: 'TEXT' 
+      };
+      //API Call & Subscription
+      this.postService.createPost(request).subscribe({ 
+        next: (res: any) => {
+          this.posts.unshift(res); //Optimistic UI Update (refreshing the page)
+          
+          this.newPostContent = ''; 
+          this.isPosting = false;
+          
+          this.cdr.detectChanges();
+        },
+        error: (err: any) => {
+          console.error('Error creating post:', err);
+          this.isPosting = false;
+          this.cdr.detectChanges();
+        }
+      });}
 
   toggleLike(post: any) {
     post.isLiked = !post.isLiked;
@@ -162,8 +163,7 @@ createPost() {
     if (post.showComments && !post.commentsList) {
       post.commentsList = []; 
 
-      // التعديل هنا: استخدمنا commentsService
-      // (ملاحظة: لو الدالة عندك في السيرفس مسمهاش getComments، غيرها للاسم الصح بتاعك)
+      // commentsService
       this.commentsService.getCommentsByPostId(post.id).subscribe({
         next: (comments: any) => {
           post.commentsList = comments;

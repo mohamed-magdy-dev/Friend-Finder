@@ -7,10 +7,9 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
-// التريكة هنا: منعنا اليوزر يعمل لايك لنفس البوست مرتين من جوه الداتا بيز نفسها!
+// I made it impossible to like the same post twice from database itself!!
 @Table(name = "POST_LIKES", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"post_id", "user_id"})
-})
+        @UniqueConstraint(columnNames = {"post_id", "user_id"})})
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

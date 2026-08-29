@@ -1,13 +1,12 @@
 package com.project._5.Friend_Finder.service;
 
+import com.project._5.Friend_Finder.dto.ActivityDto;
 import com.project._5.Friend_Finder.dto.ProfileUpdateRequestDto;
 import com.project._5.Friend_Finder.dto.UserProfileDto;
 import com.project._5.Friend_Finder.dto.UserResponseDto;
 import com.project._5.Friend_Finder.entity.Friendship;
 import com.project._5.Friend_Finder.entity.User;
-import com.project._5.Friend_Finder.repository.FriendshipRepository;
-import com.project._5.Friend_Finder.repository.PostRepository;
-import com.project._5.Friend_Finder.repository.UserRepository;
+import com.project._5.Friend_Finder.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -19,9 +18,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.UUID;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -32,7 +29,9 @@ public class UserService {
     private final FriendshipRepository friendshipRepository;
     private final PostRepository postRepository;
     private final String UPLOAD_DIR = "uploads/images/";
-
+    // user activity
+    private final CommentsRepository commentsRepository;
+    private final PostLikesRepository postLikesRepository;
     /**
      * Retrieves all users registered in the system.
      *
@@ -212,5 +211,49 @@ public class UserService {
         userRepository.save(user);
 
         return getUserProfile(user.getId(), email);
+    }
+
+    public List<ActivityDto> getUserActivity(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        List<ActivityDto> activity = new ArrayList<>();
+
+        // last 5 posts
+        postRepository.findByUserOrderByCreatedAtDesc(user, PageRequest.of(0, 5))
+                .forEach(post -> activity.add(new ActivityDto(
+                        "POST",
+                        "Posted: " + truncate(post.getContent()),
+                        post.getCreatedAt()
+                )));
+
+        // last 5 comments
+        commentsRepository.findTop5ByUserOrderByCreatedAtDesc(user)
+                .forEach(comment -> activity.add(new ActivityDto(
+                        "COMMENT",
+                        "Commented: \"" + truncate(comment.getContent()) + "\"",
+                        comment.getCreatedAt()
+                )));
+
+        // last 5 likes
+        postLikesRepository.findTop5ByUserOrderByCreatedAtDesc(user)
+                .forEach(like -> activity.add(new ActivityDto(
+                        "LIKE",
+                        "Liked a post",
+                        like.getCreatedAt()
+                )));
+
+        // we now have up to 15 items (5+5+5) from three different sources -
+        // sort them all together by date and just keep the newest 5
+        return activity.stream()
+                .sorted(Comparator.comparing(ActivityDto::getCreatedAt).reversed())
+                .limit(5)
+                .collect(Collectors.toList());
+    }
+
+    // keeps long post/comment text from blowing up the sidebar layout
+    private String truncate(String text) {
+        if (text == null) return "";
+        return text.length() > 40 ? text.substring(0, 40) + "..." : text;
     }
 }
