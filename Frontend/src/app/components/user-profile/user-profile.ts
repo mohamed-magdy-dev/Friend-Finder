@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { UserService } from '../../service/user';
 import { PostService } from '../../service/post';
+import { CommentsService } from '../../service/comments';
 import { FormsModule } from '@angular/forms';
 import { ToastService } from '../../service/toast';
 
@@ -18,6 +19,24 @@ export class UserProfile implements OnInit {
   profileData: any = null;
   userPosts: any[] = [];
   isLoadingPosts: boolean = true;
+
+  // delete-post confirmation modal - same pattern as the one in home.ts
+  postToDelete: any = null;
+  isDeleting: boolean = false;
+
+  // delete-comment confirmation modal - same idea, holds {post, comment} together
+  // since deleting a comment needs to know which post's commentsList to update
+  commentToDelete: { post: any; comment: any } | null = null;
+
+  // search box above "Recent Posts" - filters userPosts client-side,
+  // no backend call needed since the posts are already loaded
+  postSearchTerm: string = '';
+
+  get filteredPosts(): any[] {
+    const term = this.postSearchTerm.trim().toLowerCase();
+    if (!term) return this.userPosts;
+    return this.userPosts.filter(post => post?.content?.toLowerCase().includes(term));
+  }
 
   // cover and photo .. profile and cover variables
   isUploadingProfile: boolean = false;
@@ -42,12 +61,13 @@ export class UserProfile implements OnInit {
   readonly BIO_MAX_LENGTH = 300;
   readonly FULL_NAME_MAX_LENGTH = 60;
   private readonly MIN_AGE = 13;
-  private readonly MAX_AGE = 120;
+  private readonly MAX_AGE = 100;
 
   constructor(
     private route: ActivatedRoute,
     private userService: UserService,
     private postService: PostService,
+    private commentsService: CommentsService,
     private cdr: ChangeDetectorRef,
     private toastService: ToastService
   ) {}
@@ -88,6 +108,36 @@ export class UserProfile implements OnInit {
       error: (err: any) => {
         console.error('Error fetching user posts:', err);
         this.isLoadingPosts = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  // ===================== DELETE POST =====================
+  // same confirm-modal pattern used in home.ts, operating on userPosts instead of posts
+  openDeleteModal(post: any) {
+    this.postToDelete = post;
+  }
+
+  closeDeleteModal() {
+    this.postToDelete = null;
+  }
+
+  confirmDelete() {
+    if (!this.postToDelete) return;
+
+    this.isDeleting = true;
+
+    this.postService.deletePost(this.postToDelete.id).subscribe({
+      next: () => {
+        this.userPosts = this.userPosts.filter(p => p.id !== this.postToDelete.id);
+        this.isDeleting = false;
+        this.postToDelete = null;
+        this.cdr.detectChanges();
+      },
+      error: (err: any) => {
+        console.error('Error deleting post:', err);
+        this.isDeleting = false;
         this.cdr.detectChanges();
       }
     });
@@ -160,6 +210,104 @@ export class UserProfile implements OnInit {
         post.likeCount = post.isLiked ? (post.likeCount || 0) + 1 : Math.max(0, (post.likeCount || 1) - 1);
         this.cdr.detectChanges();
       }
+    });
+  }
+
+  // Shows/hides the comment thread under a post. Comments are fetched
+  // once (lazily) the first time it's opened, then cached on the post
+  // object itself so re-opening doesn't re-fetch.
+  toggleComments(post: any) {
+    post.showComments = !post.showComments;
+
+    if (post.showComments && !post.commentsList) {
+      post.commentsList = [];
+
+      this.commentsService.getCommentsByPostId(post.id).subscribe({
+        next: (comments: any) => {
+          post.commentsList = comments;
+          this.cdr.detectChanges();
+        },
+        error: (err: any) => {
+          console.error('Error fetching comments:', err);
+        }
+      });
+    } else {
+      this.cdr.detectChanges();
+    }
+  }
+
+  submitComment(post: any) {
+    if (!post.newCommentText?.trim()) return;
+
+    this.commentsService.addComment(post.id, post.newCommentText).subscribe({
+      next: (res: any) => {
+        if (!post.commentsList) post.commentsList = [];
+        post.commentsList.push(res);
+        post.commentsCount = (post.commentsCount || 0) + 1;
+        post.newCommentText = '';
+        this.cdr.detectChanges();
+      },
+      error: (err: any) => console.error('Error adding comment', err)
+    });
+  }
+
+  // Comments don't carry an authorId, only authorName - but fullName is
+  // guaranteed unique at registration (AuthService checks for that), so
+  // comparing names here is safe. The real check still happens server-side.
+  isOwnComment(comment: any): boolean {
+    return comment.authorName === localStorage.getItem('fullName');
+  }
+
+  deleteComment(post: any, comment: any) {
+    this.commentToDelete = { post, comment };
+  }
+
+  cancelDeleteComment() {
+    this.commentToDelete = null;
+  }
+
+  confirmDeleteComment() {
+    if (!this.commentToDelete) return;
+    const { post, comment } = this.commentToDelete;
+
+    this.commentsService.deleteComment(comment.id).subscribe({
+      next: () => {
+        post.commentsList = post.commentsList.filter((c: any) => c.id !== comment.id);
+        post.commentsCount = Math.max(0, (post.commentsCount || 1) - 1);
+        this.commentToDelete = null;
+        this.cdr.detectChanges(); // this is the line that makes it disappear without a manual refresh
+      },
+      error: (err: any) => {
+        console.error('Error deleting comment', err);
+        this.commentToDelete = null;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  // Inline edit for a comment - "editing" state lives on the comment object
+  // itself (comment.isEditing / comment.editText), so multiple comments on
+  // the same post can each be edited independently without extra bookkeeping.
+  startEditComment(comment: any) {
+    comment.isEditing = true;
+    comment.editText = comment.content;
+  }
+
+  cancelEditComment(comment: any) {
+    comment.isEditing = false;
+    comment.editText = '';
+  }
+
+  saveEditComment(comment: any) {
+    if (!comment.editText?.trim()) return;
+
+    this.commentsService.updateComment(comment.id, comment.editText).subscribe({
+      next: (updated: any) => {
+        comment.content = updated.content;
+        comment.isEditing = false;
+        this.cdr.detectChanges();
+      },
+      error: (err: any) => console.error('Error updating comment', err)
     });
   }
 

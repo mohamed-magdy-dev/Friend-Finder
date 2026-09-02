@@ -1,55 +1,67 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core'; 
-import { CommonModule } from '@angular/common'; 
-import { Router } from '@angular/router'; 
-import { PostService } from '../../service/post'; 
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
+import { PostService } from '../../service/post';
 import { FormsModule } from '@angular/forms';
 import { CommentsService } from '../../service/comments';
 import { UserService } from '../../service/user';
 import { NotificationService } from '../../service/notification';
 import { RouterLink } from '@angular/router';
+
 @Component({
-  selector: 'app-home', 
-  standalone: true,     
-  imports: [CommonModule, FormsModule, RouterLink], 
-  templateUrl: './home.html', 
-  styleUrl: './home.css'     
+  selector: 'app-home',
+  standalone: true,
+  imports: [CommonModule, FormsModule, RouterLink],
+  templateUrl: './home.html',
+  styleUrl: './home.css'
 })
-export class Home implements OnInit { 
-  
-  userName: string = 'Friend'; 
-  posts: any[] = []; 
-  isLoading: boolean = true; 
-  errorMessage: string = ''; 
-  newPostContent: string = ''; 
+export class Home implements OnInit {
+  userName: string = 'Friend';
+  posts: any[] = [];
+  isLoading: boolean = true;
+  errorMessage: string = '';
+  newPostContent: string = '';
   isPosting: boolean = false;
   suggestedUsers: any[] = [];
   pendingRequests: any[] = [];
+
   //counters :
   postsCount: number = 0;
   friendsCount: number = 0;
+
   // notification:
   notifications: any[] = [];
   unreadNotificationsCount: number = 0;
- isNotificationOpen: boolean = false;
+  isNotificationOpen: boolean = false;
   isFriendRequestOpen: boolean = false; // for angular vs bootstrap thing
+
   // Search variables
   searchQuery: string = '';
   searchResults: any[] = [];
   isSearchDropdownOpen: boolean = false;
+
   // profile dropdown thingy
   isProfileMenuOpen: boolean = false;
-currentUserId: number = 0;
-// for profile picture
-currentUserPic: string | null = null;
+  currentUserId: number = 0;
+
+  // for profile picture
+  currentUserPic: string | null = null;
+
+  // delete-post confirmation modal
+  postToDelete: any = null;
+  isDeleting: boolean = false;
+
+  // delete-comment confirmation modal - holds {post, comment} together
+  // since deleting a comment needs to know which post's commentsList to update
+  commentToDelete: { post: any; comment: any } | null = null;
+
   constructor(
     private router: Router,
     private postService: PostService,
-    private cdr: ChangeDetectorRef, 
+    private cdr: ChangeDetectorRef,
     private commentsService: CommentsService,
     private userService: UserService,
     private notificationService: NotificationService,
-    
-    
   ) {
     const storedName = localStorage.getItem('fullName');
     if (storedName) {
@@ -64,74 +76,71 @@ currentUserPic: string | null = null;
     this.loadSuggestedUsers();
     this.loadPendingRequests();
     this.loadNotifications();
-    
   }
-toggleNotifications() {
+
+  toggleNotifications() {
     this.isNotificationOpen = !this.isNotificationOpen;
     this.isFriendRequestOpen = false; // Close the other
   }
+
   toggleFriendRequests() {
     this.isFriendRequestOpen = !this.isFriendRequestOpen;
     this.isNotificationOpen = false; // Close the other
   }
- loadSuggestedUsers() {
+
+  loadSuggestedUsers() {
     this.userService.getSuggestedUsers().subscribe({
       next: (res: any[]) => {
         // Map the backend property 'requestSent' to our frontend property 'isRequestSent'
         this.suggestedUsers = res.map(user => {
-          user.isRequestSent = user.requestSent || false; 
+          user.isRequestSent = user.requestSent || false;
           return user;
         });
-        
-        this.cdr.detectChanges(); 
+        this.cdr.detectChanges();
       },
       error: (err: any) => console.error('Error fetching suggested users:', err)
     });
   }
 
-  // profile img 
+  // profile img
   loadCurrentUserProfile() {
     if (this.currentUserId > 0) {
       this.userService.getUserProfile(this.currentUserId).subscribe({
         next: (res: any) => {
           this.currentUserPic = res.profilePictureUrl;
-
-              this.postsCount = res.postsCount || 0;
-              this.friendsCount = res.friendsCount || 0;
-
+          this.postsCount = res.postsCount || 0;
+          this.friendsCount = res.friendsCount || 0;
           this.cdr.detectChanges();
         },
         error: (err: any) => console.error('Error fetching current user profile:', err)
       });
     }
   }
-    // Create Post .............................................................................
-    createPost() {
-      if (!this.newPostContent.trim()) return; // Validation
 
-      //Loading State
-      this.isPosting = true; 
-      //Payload Preparation
-      const request = {
-        content: this.newPostContent,
-        mediaType: 'TEXT' 
-      };
-      //API Call & Subscription
-      this.postService.createPost(request).subscribe({ 
-        next: (res: any) => {
-          this.posts.unshift(res); //Optimistic UI Update (refreshing the page)
-          
-          this.newPostContent = ''; 
-          this.isPosting = false;
-          
-          this.cdr.detectChanges();
-        },
-        error: (err: any) => {
-          console.error('Error creating post:', err);
-          this.isPosting = false;
-          this.cdr.detectChanges();
-        }
-      });}
+  createPost() {
+    if (!this.newPostContent.trim()) return;
+
+    this.isPosting = true;
+
+    const request = {
+      content: this.newPostContent,
+      mediaType: 'TEXT'
+    };
+
+    this.postService.createPost(request).subscribe({
+      next: (res: any) => {
+        this.posts.unshift(res);
+        this.newPostContent = '';
+        this.isPosting = false;
+        this.cdr.detectChanges();
+      },
+      error: (err: any) => {
+        console.error('Error creating post:', err);
+        this.isPosting = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
 
   toggleLike(post: any) {
     post.isLiked = !post.isLiked;
@@ -142,10 +151,10 @@ toggleNotifications() {
       next: (res: any) => {
         console.log('Liked successfully on backend');
       },
-      error: (err: any) => { 
+      error: (err: any) => {
         if (err.status === 200 || err.status === 201) {
-           console.log('Backend success but parse error (Ignored)');
-           return; 
+          console.log('Backend success but parse error (Ignored)');
+          return;
         }
 
         console.error('Real Error liking post:', err);
@@ -156,18 +165,19 @@ toggleNotifications() {
     });
   }
 
- 
+  // Shows/hides the comment thread under a post. Comments are fetched
+  // once (lazily) the first time it's opened, then cached on the post
+  // object itself so re-opening doesn't re-fetch.
   toggleComments(post: any) {
     post.showComments = !post.showComments;
 
     if (post.showComments && !post.commentsList) {
-      post.commentsList = []; 
+      post.commentsList = [];
 
-      // commentsService
       this.commentsService.getCommentsByPostId(post.id).subscribe({
         next: (comments: any) => {
           post.commentsList = comments;
-          this.cdr.detectChanges(); 
+          this.cdr.detectChanges();
         },
         error: (err: any) => {
           console.error('Error fetching comments:', err);
@@ -182,18 +192,15 @@ toggleNotifications() {
     this.isLoading = true;
     this.postService.getAllPosts(0, 10).subscribe({
       next: (res: any) => {
-        this.posts = res.content ? res.content : (Array.isArray(res) ? res : []); 
-        this.isLoading = false; 
-        
-        this.cdr.detectChanges(); 
+        this.posts = res.content ? res.content : (Array.isArray(res) ? res : []);
+        this.isLoading = false;
+        this.cdr.detectChanges();
       },
       error: (err: any) => {
         console.error('Error fetching posts:', err);
         this.errorMessage = 'Failed to load posts. Check console.';
         this.isLoading = false;
-        
-        
-        this.cdr.detectChanges(); 
+        this.cdr.detectChanges();
 
         if (err.status === 403) {
           this.logout();
@@ -202,63 +209,117 @@ toggleNotifications() {
     });
   }
 
- 
-  
   submitComment(post: any) {
-    if (!post.newCommentText?.trim()) return; 
+    if (!post.newCommentText?.trim()) return;
 
     this.commentsService.addComment(post.id, post.newCommentText).subscribe({
-      next: (res) => {
+      next: (res: any) => {
         if (!post.commentsList) post.commentsList = [];
-        post.commentsList.push(res); 
-        post.newCommentText = ''; 
+        post.commentsList.push(res);
+        post.commentsCount = (post.commentsCount || 0) + 1;
+        post.newCommentText = '';
         this.cdr.detectChanges();
       },
       error: (err) => console.error('Error adding comment', err)
     });
   }
-  
+
+  // Comments don't carry an authorId, only authorName - but fullName is
+  // guaranteed unique at registration (AuthService checks for that), so
+  // comparing names here is safe. The real check still happens server-side.
+  isOwnComment(comment: any): boolean {
+    return comment.authorName === localStorage.getItem('fullName');
+  }
+
+  // clicking the trash icon just opens the confirm modal - the actual
+  // delete happens in confirmDeleteComment() below
+  deleteComment(post: any, comment: any) {
+    this.commentToDelete = { post, comment };
+  }
+
+  cancelDeleteComment() {
+    this.commentToDelete = null;
+  }
+
+  confirmDeleteComment() {
+    if (!this.commentToDelete) return;
+    const { post, comment } = this.commentToDelete;
+
+    this.commentsService.deleteComment(comment.id).subscribe({
+      next: () => {
+        post.commentsList = post.commentsList.filter((c: any) => c.id !== comment.id);
+        post.commentsCount = Math.max(0, (post.commentsCount || 1) - 1);
+        this.commentToDelete = null;
+        this.cdr.detectChanges(); // this is what makes it disappear without a manual refresh
+      },
+      error: (err: any) => {
+        console.error('Error deleting comment', err);
+        this.commentToDelete = null;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  // Inline edit for a comment - "editing" state lives on the comment object
+  // itself (comment.isEditing / comment.editText), so multiple comments on
+  // the same post can each be edited independently without extra bookkeeping.
+  startEditComment(comment: any) {
+    comment.isEditing = true;
+    comment.editText = comment.content;
+  }
+
+  cancelEditComment(comment: any) {
+    comment.isEditing = false;
+    comment.editText = '';
+  }
+
+  saveEditComment(comment: any) {
+    if (!comment.editText?.trim()) return;
+
+    this.commentsService.updateComment(comment.id, comment.editText).subscribe({
+      next: (updated: any) => {
+        comment.content = updated.content;
+        comment.isEditing = false;
+        this.cdr.detectChanges();
+      },
+      error: (err: any) => console.error('Error updating comment', err)
+    });
+  }
+
   logout() {
     localStorage.removeItem('token');
     localStorage.removeItem('fullName');
     this.router.navigate(['/login']);
   }
 
-
   toggleFriendRequest(user: any) {
     if (user.isRequestSent) {
-      
-      user.isRequestSent = false; 
+      user.isRequestSent = false;
       this.cdr.detectChanges();
-      
       this.userService.cancelFriendRequest(user.id).subscribe({
         next: () => console.log('Request cancelled successfully'),
         error: (err: any) => {
           console.error('Error cancelling request', err);
-          user.isRequestSent = true; 
+          user.isRequestSent = true;
           this.cdr.detectChanges();
         }
       });
-      
     } else {
-      user.isRequestSent = true; 
+      user.isRequestSent = true;
       this.cdr.detectChanges();
 
       this.userService.sendFriendRequest(user.id).subscribe({
         next: () => console.log('Request sent successfully'),
         error: (err: any) => {
           console.error('Error sending request:', err);
-          user.isRequestSent = false; 
+          user.isRequestSent = false;
           this.cdr.detectChanges();
         }
       });
     }
   }
 
-
-  
-   // Loads all pending friend requests from the backend.
-   
+  // Loads all pending friend requests from the backend.
   loadPendingRequests() {
     this.userService.getPendingFriendRequests().subscribe({
       next: (res: any[]) => {
@@ -269,9 +330,7 @@ toggleNotifications() {
     });
   }
 
-
-   // Accepts a friend request and removes it from the UI instantly.
-   
+  // Accepts a friend request and removes it from the UI instantly.
   acceptRequest(requestId: number) {
     // Optimistic UI update: Remove the request from the array immediately
     this.pendingRequests = this.pendingRequests.filter(req => req.requestId !== requestId);
@@ -288,9 +347,7 @@ toggleNotifications() {
     });
   }
 
- 
-   // Rejects a friend request and removes it from the UI instantly.
-   
+  // Rejects a friend request and removes it from the UI instantly.
   rejectRequest(requestId: number) {
     // Optimistic UI update: Remove the request from the array immediately
     this.pendingRequests = this.pendingRequests.filter(req => req.requestId !== requestId);
@@ -307,9 +364,7 @@ toggleNotifications() {
     });
   }
 
- 
-    //Loads notifications and calculates the unread count:
- 
+  // Loads notifications and calculates the unread count:
   loadNotifications() {
     this.notificationService.getNotifications().subscribe({
       next: (res: any[]) => {
@@ -322,9 +377,7 @@ toggleNotifications() {
     });
   }
 
-  
-    // Marks a notification as read and updates the UI instantly.
-  
+  // Marks a notification as read and updates the UI instantly.
   markNotificationAsRead(notification: any) {
     if (notification.read) return; // Already read, do nothing
 
@@ -355,13 +408,15 @@ toggleNotifications() {
       error: (err: any) => console.error('Error searching users:', err)
     });
   }
-    // Triggered when the user presses Enter in the search bar
-       onSearchEnter() {
-        if (this.searchQuery.trim()) {
-        this.isSearchDropdownOpen = false;
-        this.router.navigate(['/search', this.searchQuery.trim()]);
-      }
-    }   
+
+  // Triggered when the user presses Enter in the search bar
+  onSearchEnter() {
+    if (this.searchQuery.trim()) {
+      this.isSearchDropdownOpen = false;
+      this.router.navigate(['/search', this.searchQuery.trim()]);
+    }
+  }
+
   // Closes the dropdown (used when clicking outside or losing focus)
   closeSearch() {
     // Timeout allows the click event on the link to fire before hiding the dropdown
@@ -371,31 +426,23 @@ toggleNotifications() {
     }, 200);
   }
 
-  postToDelete: any = null;
-  isDeleting: boolean = false;
-
-  
+  // ===================== DELETE POST =====================
   openDeleteModal(post: any) {
     this.postToDelete = post;
   }
 
-  
   closeDeleteModal() {
     this.postToDelete = null;
   }
 
- 
   confirmDelete() {
     if (!this.postToDelete) return;
 
-    this.isDeleting = true; 
+    this.isDeleting = true;
 
     this.postService.deletePost(this.postToDelete.id).subscribe({
       next: () => {
-        
         this.posts = this.posts.filter(p => p.id !== this.postToDelete.id);
-        
-        
         this.isDeleting = false;
         this.postToDelete = null;
         this.cdr.detectChanges();

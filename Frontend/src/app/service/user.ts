@@ -38,9 +38,9 @@ export class UserService {
     return this.http.delete(`${this.friendsApiUrl}/cancel/${receiverId}`, { headers, responseType: 'text' as 'json' });
   }
 
-  /**
-   * Fetches the list of pending friend requests for the current user.
-   */
+  
+  // Fetches the list of pending friend requests for the current user.
+   
   getPendingFriendRequests(): Observable<any[]> {
     const token = localStorage.getItem('token');
     const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
@@ -48,9 +48,9 @@ export class UserService {
     return this.http.get<any[]>(`${this.friendsApiUrl}/pending`, { headers });
   }
 
-  /**
-   * Accepts a specific friend request by its ID.
-   */
+  
+    // Accepts a specific friend request by its ID.
+   
   acceptFriendRequest(requestId: number): Observable<any> {
     const token = localStorage.getItem('token');
     const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
@@ -59,9 +59,9 @@ export class UserService {
     return this.http.put(`${this.friendsApiUrl}/accept/${requestId}`, {}, { headers, responseType: 'text' as 'json' });
   }
 
-  /**
-   * Rejects (deletes) a specific friend request by its ID.
-   */
+  
+   // Rejects (deletes) a specific friend request by its ID.
+   
   rejectFriendRequest(requestId: number): Observable<any> {
     const token = localStorage.getItem('token');
     const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });

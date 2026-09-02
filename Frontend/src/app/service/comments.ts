@@ -21,4 +21,17 @@ export class CommentsService {
     const headers = new HttpHeaders({ 'Authorization': `Bearer ${localStorage.getItem('token')}` });
     return this.http.post<any>(`${this.apiUrl}/${postId}/comments`, { content }, { headers });
   }
+
+  // deleting the comment
+  deleteComment(commentId: number): Observable<any> {
+    const headers = new HttpHeaders({ 'Authorization': `Bearer ${localStorage.getItem('token')}` });
+    return this.http.delete<any>(`${this.apiUrl}/comments/${commentId}`, { headers, responseType: 'text' as 'json' });
+    // I added responseType 'text' - backend returns a plain String, not JSON...
+   }
+// editing the comment
+updateComment(commentId: number, content: string): Observable<any> {
+  const headers = new HttpHeaders({'Authorization': `Bearer ${localStorage.getItem('token')}`});
+  return this.http.put<any>(`${this.apiUrl}/comments/${commentId}`,{ content },{ headers }); 
+  }
+
 }

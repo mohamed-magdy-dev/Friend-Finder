@@ -251,7 +251,7 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
-    // keeps long post/comment text from blowing up the sidebar layout
+    // keeps long [post/comment] text from blowing up the sidebar layout
     private String truncate(String text) {
         if (text == null) return "";
         return text.length() > 40 ? text.substring(0, 40) + "..." : text;

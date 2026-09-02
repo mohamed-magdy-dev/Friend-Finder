@@ -23,9 +23,9 @@ export class FriendRequests implements OnInit {
     this.loadPendingRequests();
   }
 
-  /**
-   * Fetches pending friend requests from the server.
-   */
+  
+   // Fetches pending friend requests from the server.
+   
   loadPendingRequests() {
     this.userService.getPendingFriendRequests().subscribe({
       next: (res: any[]) => {
@@ -36,9 +36,8 @@ export class FriendRequests implements OnInit {
     });
   }
 
-  /**
-   * Accepts a request and removes it from the UI.
-   */
+  
+   // Accepts a request and removes it from the UI.
   acceptRequest(requestId: number) {
     this.pendingRequests = this.pendingRequests.filter(req => req.requestId !== requestId);
     this.cdr.detectChanges();
@@ -48,9 +47,9 @@ export class FriendRequests implements OnInit {
     });
   }
 
-  /**
-   * Rejects a request and removes it from the UI.
-   */
+  
+    // Rejects a request and removes it from the UI.
+   
   rejectRequest(requestId: number) {
     this.pendingRequests = this.pendingRequests.filter(req => req.requestId !== requestId);
     this.cdr.detectChanges();

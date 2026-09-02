@@ -10,7 +10,7 @@ import com.project._5.Friend_Finder.repository.PostRepository;
 import com.project._5.Friend_Finder.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
+import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -66,5 +66,42 @@ public class CommentsService {
                 comment.getCreatedAt(),
                 comment.getUser().getProfilePictureUrl()
         );
+    }
+
+    // editing comment
+    @Transactional
+    public CommentsResponseDto updateComment(Long commentId, String newContent, String userEmail) {
+        Comment comment = commentsRepository.findById(commentId)
+                .orElseThrow(() -> new RuntimeException("Comment not found"));
+
+        // same ownership check as delete - only the author can edit it
+        if (!comment.getUser().getEmail().equals(userEmail)) {
+            throw new RuntimeException("Unauthorized: You can only edit your own comments.");
+        }
+
+        comment.setContent(newContent);
+        commentsRepository.save(comment);
+
+        return new CommentsResponseDto(
+                comment.getId(),
+                comment.getContent(),
+                comment.getUser().getFullName(),
+                comment.getUser().getEmail(),
+                comment.getCreatedAt(),
+                comment.getUser().getProfilePictureUrl()
+        );
+    }
+    // deleting comment
+    @Transactional
+    public String deleteComment(Long commentId, String userEmail) {
+        Comment comment = commentsRepository.findById(commentId)
+                .orElseThrow(() -> new RuntimeException("Comment not found"));
+        // same ownership check pattern as deletePost - only the author can delete it
+        if (!comment.getUser().getEmail().equals(userEmail)) {
+            throw new RuntimeException("Unauthorized: You can only delete your own comments.");
+        }
+
+        commentsRepository.delete(comment);
+        return "Comment deleted successfully.";
     }
 }

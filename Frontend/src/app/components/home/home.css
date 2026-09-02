@@ -1,6 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
 
-/* 🌟 التريكة الهندسية: استخدمنا :host بدل :root عشان نعزل الألوان جوه الـ Home بس 🌟 */
 :host {
   --ff-clr-page:         #F0EDE6;
   --ff-clr-card:         #FFFFFF;
@@ -34,7 +33,6 @@
   min-height: 100vh;
 }
 
-/* ── باقي أكواد الديزاين كما هي ── */
 .ff-navbar { background: var(--ff-clr-nav); box-shadow: var(--ff-shadow-nav); height: 62px; position: sticky; top: 0; z-index: 1030; }
 .ff-brand { font-family: var(--ff-font-brand); font-size: 1.35rem; font-weight: 800; color: var(--ff-clr-accent) !important; letter-spacing: -0.01em; text-decoration: none; white-space: nowrap; }
 .ff-search-wrap { position: relative; }

@@ -31,6 +31,20 @@ public class CommentsController {
         return ResponseEntity.ok(newComment);
     }
 
+    // Deleting comment
+    @DeleteMapping("/comments/{commentId}")
+    public ResponseEntity<String> deleteComment(@PathVariable Long commentId, Principal principal) {
+        String result = commentsService.deleteComment(commentId, principal.getName());
+        return ResponseEntity.ok(result);
+    }
+    // update comment (for user)
+    @PutMapping("/comments/{commentId}")
+    public ResponseEntity<CommentsResponseDto> updateComment( @PathVariable Long commentId,  @RequestBody CommentsRequestDto request,  Principal principal) {
+        CommentsResponseDto updatedComment = commentsService.updateComment(commentId, request.getContent(), principal.getName());
+
+        return ResponseEntity.ok(updatedComment);
+    }
+
     // Get, to bring post comments
     // link will be something like GET /api/posts/1/comments
     @GetMapping("/{postId}/comments")

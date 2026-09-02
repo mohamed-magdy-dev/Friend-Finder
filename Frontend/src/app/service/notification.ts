@@ -11,9 +11,9 @@ export class NotificationService {
 
   constructor(private http: HttpClient) { }
 
-  /**
-   * Fetches all notifications for the current logged-in user.
-   */
+  
+   // Fetches all notifications for the current logged-in user.
+   
   getNotifications(): Observable<any[]> {
     const token = localStorage.getItem('token');
     const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
@@ -21,9 +21,9 @@ export class NotificationService {
     return this.http.get<any[]>(this.apiUrl, { headers });
   }
 
-  /**
-   * Marks a specific notification as read.
-   */
+  
+   // Marks a specific notification as read.
+   
   markAsRead(notificationId: number): Observable<any> {
     const token = localStorage.getItem('token');
     const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
