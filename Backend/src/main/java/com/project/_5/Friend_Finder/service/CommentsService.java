@@ -3,9 +3,11 @@ package com.project._5.Friend_Finder.service;
 import com.project._5.Friend_Finder.dto.CommentsRequestDto;
 import com.project._5.Friend_Finder.dto.CommentsResponseDto;
 import com.project._5.Friend_Finder.entity.Comment;
+import com.project._5.Friend_Finder.entity.Notification;
 import com.project._5.Friend_Finder.entity.Post;
 import com.project._5.Friend_Finder.entity.User;
 import com.project._5.Friend_Finder.repository.CommentsRepository;
+import com.project._5.Friend_Finder.repository.NotificationRepository;
 import com.project._5.Friend_Finder.repository.PostRepository;
 import com.project._5.Friend_Finder.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +23,7 @@ public class CommentsService {
     private final CommentsRepository commentsRepository;
     private final PostRepository postRepository;
     private final UserRepository userRepository;
-
+    private final NotificationRepository notificationRepository; // again for notification
     // method for adding new comment
     public CommentsResponseDto addComment(Long postId, String userEmail, CommentsRequestDto request) {
        // first we bring user details --> to know who wrote the comment ofc
@@ -41,6 +43,14 @@ public class CommentsService {
 
         Comment savedComment = commentsRepository.save(comment);
 
+        // same Idea like PostLikeService like function -->
+        // we notify post owner, skip if commenting on own post
+        if (!post.getUser().getId().equals(user.getId())) {
+            Notification notification = new Notification();
+            notification.setUser(post.getUser());
+            notification.setMessage(user.getFullName() + " commented on your post.");
+            notificationRepository.save(notification);
+        }
 
         return mapToDto(savedComment);
     }
