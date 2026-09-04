@@ -1,0 +1,159 @@
+<div class="glass-container">
+
+  <div class="switch-buttons">
+    <button type="button" [class.active]="!isSignUpActive" (click)="switchTab(false)">
+      Login
+    </button>
+    <button type="button" [class.active]="isSignUpActive" (click)="switchTab(true)">
+      Sign Up
+    </button>
+  </div>
+
+  @if (!isSignUpActive) {
+    <div class="form-content animate-mode">
+      <h2>Welcome Back!</h2>
+      <p>Login to continue.</p>
+
+      <form (ngSubmit)="onLogin()" #loginForm="ngForm">
+        <div class="input-group">
+          <input type="email"
+                 placeholder="Email or Full Name"
+                 [(ngModel)]="loginData.email"
+                 name="email"
+                 required>
+        </div>
+
+        <div class="input-group password-input-container">
+          <input [type]="showLoginPassword ? 'text' : 'password'"
+                 placeholder="Password"
+                 [(ngModel)]="loginData.password"
+                 name="password"
+                 required>
+          <button type="button" class="eye-btn" (click)="toggleLoginPassword()" tabindex="-1">
+            <i class="bi" [ngClass]="showLoginPassword ? 'bi-eye-slash-fill' : 'bi-eye-fill'"></i>
+          </button>
+        </div>
+
+        <button type="submit" class="submit-btn" [disabled]="loginForm.invalid || isSubmitting">
+          @if (isSubmitting) {
+            <span class="spinner-border spinner-border-sm me-2"></span> Logging in...
+          } @else {
+            Login
+          }
+        </button>
+
+        @if (message) {
+          <div class="prompt-msg"
+               [ngClass]="{
+                 'success-msg': messageType === 'success',
+                 'error-msg': messageType === 'error'
+               }">
+            {{ message }}
+          </div>
+        }
+      </form>
+    </div>
+  }
+
+  @if (isSignUpActive) {
+    <div class="form-content animate-mode">
+      <h2>Create Account</h2>
+      <p>Join our community.</p>
+
+      <form (ngSubmit)="onRegister()" #registerForm="ngForm">
+        <div class="input-group">
+          <input type="text"
+                 placeholder="Full Name"
+                 [(ngModel)]="registerData.fullName"
+                 name="fullName"
+                 required>
+        </div>
+
+        <div class="input-group">
+          <input type="email"
+                 placeholder="Email Address"
+                 [(ngModel)]="registerData.email"
+                 name="remail"
+                 required>
+        </div>
+
+        <!-- password field, tracks focus so we know when to show the rules below -->
+        <div class="input-group password-input-container">
+          <input [type]="showRegisterPassword ? 'text' : 'password'"
+                 placeholder="Password"
+                 [(ngModel)]="registerData.password"
+                 name="rpassword"
+                 required
+                 minlength="8"
+                 (focus)="passwordFocused = true"
+                 (blur)="passwordFocused = false"
+                 #rpassword="ngModel">
+          <button type="button" class="eye-btn" (click)="toggleRegisterPassword()" tabindex="-1">
+            <i class="bi" [ngClass]="showRegisterPassword ? 'bi-eye-slash-fill' : 'bi-eye-fill'"></i>
+          </button>
+        </div>
+
+        <!--
+          rules stay visible while typing, and also if the user clicks away
+          but the password still isn't valid - so they don't lose the hint
+        -->
+        @if (passwordFocused || (registerData.password && !isPasswordValid)) {
+          <ul class="password-rules">
+            <li [class.valid]="passwordHasMinLength">
+              <i class="bi" [ngClass]="passwordHasMinLength ? 'bi-check-circle-fill' : 'bi-circle'"></i>
+              8+ characters
+            </li>
+            <li [class.valid]="passwordHasUppercase">
+              <i class="bi" [ngClass]="passwordHasUppercase ? 'bi-check-circle-fill' : 'bi-circle'"></i>
+              Uppercase letter
+            </li>
+            <li [class.valid]="passwordHasSpecialChar">
+              <i class="bi" [ngClass]="passwordHasSpecialChar ? 'bi-check-circle-fill' : 'bi-circle'"></i>
+              Special character
+            </li>
+          </ul>
+        }
+
+        <!-- confirm password -->
+        <div class="input-group password-input-container">
+          <input [type]="showConfirmPassword ? 'text' : 'password'"
+                 placeholder="Confirm Password"
+                 [(ngModel)]="registerData.confirmPassword"
+                 name="confirmPassword"
+                 required
+                 #confirmPassword="ngModel">
+          <button type="button" class="eye-btn" (click)="toggleConfirmPassword()" tabindex="-1">
+            <i class="bi" [ngClass]="showConfirmPassword ? 'bi-eye-slash-fill' : 'bi-eye-fill'"></i>
+          </button>
+        </div>
+
+        @if (registerData.confirmPassword && registerData.password !== registerData.confirmPassword) {
+          <div class="inline-error">
+            Passwords do not match.
+          </div>
+        }
+
+        <button type="submit"
+                class="submit-btn"
+                [disabled]="registerForm.invalid || isSubmitting || !isPasswordValid || registerData.password !== registerData.confirmPassword">
+          @if (isSubmitting) {
+            <span class="spinner-border spinner-border-sm me-2"></span> Creating account...
+          } @else {
+            Sign Up
+          }
+        </button>
+
+        @if (message) {
+          <div class="prompt-msg"
+               [ngClass]="{
+                 'success-msg': messageType === 'success',
+                 'error-msg': messageType === 'error'
+               }">
+            {{ message }}
+          </div>
+        }
+      </form>
+    </div>
+  }
+
+</div>

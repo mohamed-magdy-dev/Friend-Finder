@@ -1,0 +1,61 @@
+<div class="ff-page-wrap" style="background-color: #f4f6f8; min-height: 100vh; padding-bottom: 2rem;">
+  
+  <nav class="navbar bg-white px-3 px-lg-4 mb-4 shadow-sm sticky-top" style="border-bottom: 1px solid #eaeaea; z-index: 1000;">
+    <div class="container-xl d-flex align-items-center w-100">
+      <a routerLink="/home" class="btn btn-light text-secondary fw-bold rounded-pill d-inline-flex align-items-center px-4 py-2" style="transition: all 0.2s ease;">
+        <i class="bi bi-arrow-left-short fs-4 me-1" style="margin-left: -5px;"></i> Back to Feed
+      </a>
+    </div>
+  </nav>
+
+  <div class="container-xl py-2 px-3 px-lg-4">
+    
+    <div class="d-flex align-items-center mb-4">
+      <i class="bi bi-people-fill fs-3 text-primary me-2"></i>
+      <h3 class="m-0 fw-bold" style="color: #1a1a1a;">Friend Requests</h3>
+    </div>
+
+    @if (pendingRequests.length > 0) {
+      <div class="row g-4">
+        @for (req of pendingRequests; track req.requestId) {
+          <div class="col-md-4 col-lg-3">
+            
+            <div class="ff-card p-4 text-center h-100 shadow-sm bg-white ff-anim d-flex flex-column" style="border-radius: 16px; border: 1px solid #e0e4e8;">
+              
+              <div class="ff-avatar-lg mx-auto mb-3 shadow-sm d-flex align-items-center justify-content-center text-white fw-bold" 
+                   [style.background]="req.senderProfilePictureUrl ? 'url(\'' + req.senderProfilePictureUrl + '\') center/cover' : 'hsl(' + ((req.senderName.charCodeAt(0) || 65) * 137 % 360) + ',70%,52%)'"
+                   style="width:80px; height:80px; font-size:2.5rem; border-radius: 50%;">
+                {{ !req.senderProfilePictureUrl ? req.senderName.charAt(0).toUpperCase() : '' }}
+              </div>
+              
+              <h6 class="fw-bold mb-1 text-truncate" style="color: #1a1a1a; font-size: 1.1rem;">{{ req.senderName }}</h6>
+              <p class="text-muted small mb-4">Wants to be friends</p>
+              
+              <div class="d-flex gap-2 mt-auto">
+                <button class="btn btn-primary rounded-pill flex-grow-1 fw-bold shadow-sm" (click)="acceptRequest(req.requestId)">
+                  Confirm
+                </button>
+                <button class="btn btn-outline-secondary rounded-pill flex-grow-1 fw-bold" (click)="rejectRequest(req.requestId)">
+                  Delete
+                </button>
+              </div>
+              
+            </div>
+            
+          </div>
+        }
+      </div>
+    } 
+    @else {
+      <div class="text-center py-5 bg-white shadow-sm" style="border-radius: 16px; border: 1px dashed #ced4da; margin-top: 2rem;">
+        <i class="bi bi-inbox fs-1 text-muted mb-3 d-block"></i>
+        <h5 class="text-dark fw-bold mb-2">No New Requests</h5>
+        <p class="text-muted mb-0">You're all caught up! You don't have any pending friend requests right now.</p>
+        <button class="btn btn-light border rounded-pill fw-bold mt-4 px-4 text-primary" routerLink="/home">
+          Return to Feed
+        </button>
+      </div>
+    }
+
+  </div>
+</div>

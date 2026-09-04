@@ -1,0 +1,264 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+:host {
+    --ff-clr-page:         #F0EDE6;
+    --ff-clr-card:         #FFFFFF;
+    --ff-clr-ink:          #1C1917;
+    --ff-clr-ink-2:        #78716C;
+    --ff-clr-ink-3:        #B5AFA8;
+    --ff-clr-accent:       #D64000;
+    --ff-clr-accent-hv:    #B83700;
+    --ff-clr-border:       #E5DFD6;
+    --ff-shadow-card:      0 8px 30px rgba(28,25,23,.08);
+    --ff-radius:           18px;
+    --ff-font-brand:       'Playfair Display', Georgia, serif;
+    --ff-font-ui:          'Plus Jakarta Sans', system-ui, sans-serif;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+    background: radial-gradient(circle at top left, #fbf8f2, var(--ff-clr-page) 60%);
+    font-family: var(--ff-font-ui);
+}
+
+.glass-container {
+    background: var(--ff-clr-card);
+    box-shadow: var(--ff-shadow-card);
+    border-radius: var(--ff-radius);
+    border: 1px solid var(--ff-clr-border);
+    width: 420px;
+    max-width: 100%;
+    padding: 40px;
+    text-align: center;
+    color: var(--ff-clr-ink);
+    position: relative;
+    overflow: hidden;
+}
+
+.switch-buttons {
+    margin-bottom: 25px;
+    background: #f4f6f8;
+    border-radius: 999px;
+    display: inline-flex;
+    width: 100%;
+    max-width: 280px;
+    padding: 5px;
+    border: 1px solid var(--ff-clr-border);
+}
+
+.switch-buttons button {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--ff-clr-ink-2);
+    padding: 10px 20px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    font-family: var(--ff-font-ui);
+}
+
+.switch-buttons button.active {
+    background: var(--ff-clr-card);
+    color: var(--ff-clr-accent);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+h2 {
+    font-family: var(--ff-font-brand);
+    font-size: 28px;
+    font-weight: 800;
+    margin-bottom: 5px;
+    color: var(--ff-clr-ink);
+}
+
+p {
+    font-size: 14px;
+    color: var(--ff-clr-ink-2);
+    margin-bottom: 25px;
+}
+
+form {
+    text-align: left;
+}
+
+.input-group {
+    margin-bottom: 15px;
+    width: 100%;
+    position: relative;
+}
+
+input {
+    width: 100%;
+    padding: 14px 18px;
+    border-radius: 12px;
+    border: 1.5px solid var(--ff-clr-border);
+    background: #fafafa;
+    font-size: 14px;
+    font-family: var(--ff-font-ui);
+    color: var(--ff-clr-ink);
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+input::placeholder {
+    color: var(--ff-clr-ink-3);
+}
+
+input:focus {
+    background: var(--ff-clr-card);
+    border-color: var(--ff-clr-accent);
+    box-shadow: 0 0 0 3px rgba(214, 64, 0, 0.15);
+}
+
+/* password field with eye toggle */
+.password-input-container input {
+    padding-right: 44px;
+}
+
+.eye-btn {
+    position: absolute;
+    top: 50%;
+    right: 12px;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 1.05rem;
+    color: var(--ff-clr-ink-3);
+    padding: 4px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s ease;
+}
+
+.eye-btn:hover {
+    color: var(--ff-clr-ink-2);
+}
+
+.submit-btn {
+    width: 100%;
+    padding: 14px;
+    margin-top: 10px;
+    background: var(--ff-clr-accent);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 700;
+    font-family: var(--ff-font-ui);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, transform 0.2s ease;
+}
+
+.submit-btn:hover:not(:disabled) {
+    background: var(--ff-clr-accent-hv);
+    transform: translateY(-2px);
+}
+
+.submit-btn:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.submit-btn:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.prompt-msg {
+    padding: 12px;
+    border-radius: 10px;
+    margin-top: 15px;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.success-msg { color: #155724; background-color: #d4edda; border: 1px solid #c3e6cb; }
+.error-msg { color: #721c24; background-color: #f8d7da; border: 1px solid #f5c6cb; }
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-mode {
+    animation: smoothFadeUp 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes smoothFadeUp {
+    0% { opacity: 0; transform: translateY(15px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 480px) {
+    .glass-container {
+        padding: 28px 22px;
+    }
+}
+
+/* small text under confirm-password when the two don't match yet */
+.inline-error {
+    color: #dc3545;
+    font-size: 12px;
+    font-weight: 600;
+    margin: 4px 0 14px;
+    padding-left: 4px;
+}
+
+/*
+  password rules checklist, styled as small pills instead of a boxed panel
+  so it reads as part of the form instead of a separate warning block -
+  same pill shape as .switch-buttons above, just smaller
+*/
+.password-rules {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    list-style: none;
+    margin: 8px 0 15px;
+    padding: 0;
+    animation: fadeIn 0.2s ease-in-out;
+}
+
+.password-rules li {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 5px 10px;
+    border-radius: 999px;
+    background: #f4f6f8;
+    border: 1px solid var(--ff-clr-border);
+    color: var(--ff-clr-ink-3);
+    font-size: 11.5px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.password-rules li i {
+    font-size: 0.85rem;
+}
+
+/* turns green once that specific rule is satisfied */
+.password-rules li.valid {
+    background: rgba(40, 167, 69, 0.1);
+    border-color: rgba(40, 167, 69, 0.3);
+    color: #1e7e34;
+}

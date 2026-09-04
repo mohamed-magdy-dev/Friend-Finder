@@ -1,0 +1,8 @@
+.ff-toast-anim { 
+  animation: slideUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+} 
+
+@keyframes slideUp { 
+  from { transform: translateY(100%); opacity: 0; } 
+  to { transform: translateY(0); opacity: 1; } 
+}

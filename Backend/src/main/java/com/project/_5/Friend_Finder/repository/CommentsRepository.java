@@ -1,0 +1,22 @@
+package com.project._5.Friend_Finder.repository;
+import com.project._5.Friend_Finder.entity.Comment;
+import com.project._5.Friend_Finder.entity.Post;
+import com.project._5.Friend_Finder.entity.User;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+@Repository
+public interface CommentsRepository extends JpaRepository<Comment, Long> {
+    List<Comment> findByPostIdOrderByCreatedAtAsc(Long postId);
+
+    // counting comments according to the post
+    Integer countByPostId(Long postId);
+
+    // Interface to delete comments (for deleting post)
+    void deleteByPost(Post post);
+
+    // recent activity
+    List<Comment> findTop5ByUserOrderByCreatedAtDesc(User user);
+}

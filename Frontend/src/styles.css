@@ -1,1 +1,12 @@
-/* You can add global styles to this file, and also import other style files */
+@import 'bootstrap/dist/css/bootstrap.min.css';
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body { margin: 0; padding: 0; overflow-x: hidden; }
+
+:focus-visible { outline: 2px solid rgba(214, 64, 0, 0.5); outline-offset: 2px; }
+
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #E5DFD6; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #B5AFA8; }
