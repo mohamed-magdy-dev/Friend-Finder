@@ -13,4 +13,5 @@ public class NotificationDto {
     private String message;
     private boolean isRead;
     private LocalDateTime createdAt;
+    private Long postId;
 }

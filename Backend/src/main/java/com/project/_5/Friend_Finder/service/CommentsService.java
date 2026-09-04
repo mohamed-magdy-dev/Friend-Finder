@@ -49,6 +49,7 @@ public class CommentsService {
             Notification notification = new Notification();
             notification.setUser(post.getUser());
             notification.setMessage(user.getFullName() + " commented on your post.");
+            notification.setPostId(post.getId()); // getting post id right before saving
             notificationRepository.save(notification);
         }
 

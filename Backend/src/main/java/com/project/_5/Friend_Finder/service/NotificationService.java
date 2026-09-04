@@ -30,7 +30,8 @@ public class NotificationService {
                         notif.getId(),
                         notif.getMessage(),
                         notif.isRead(),
-                        notif.getCreatedAt()
+                        notif.getCreatedAt(),
+                        notif.getPostId()
                 ))
                 .collect(Collectors.toList());
     }

@@ -17,6 +17,9 @@ public class Notification {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "POST_ID", nullable = true)
+    private Long postId;
+
     @Column(nullable = false)
     private String message;
 

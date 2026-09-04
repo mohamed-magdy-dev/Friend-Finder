@@ -49,6 +49,7 @@ public class PostLikesService {
                 Notification notification = new Notification();
                 notification.setUser(post.getUser());
                 notification.setMessage(user.getFullName() + " liked your post.");
+                notification.setPostId(post.getId()); // right before saving
                 notificationRepository.save(notification);
             }
             return "Liked";

@@ -1,5 +1,4 @@
 <div class="ff-page-wrap">
-
   <nav class="ff-navbar d-flex align-items-center px-3 px-lg-4">
     <div class="container-xl d-flex align-items-center gap-3 w-100">
       <a class="ff-brand me-2">Friend Finder</a>
@@ -71,7 +70,7 @@
                     <a class="dropdown-item p-3 border-bottom"
                        style="cursor: pointer; white-space: normal; transition: background-color 0.2s;"
                        [ngClass]="{'bg-light': !notif.read}"
-                       (click)="markNotificationAsRead(notif)">
+                       (click)="openNotification(notif)">
                       <div class="d-flex justify-content-between align-items-start">
                         <span class="small" dir="auto" [ngClass]="{'fw-bold text-dark': !notif.read, 'text-muted': notif.read}">
                           {{ notif.message }}
@@ -208,7 +207,7 @@
         }
 
         @for (post of posts; track post.id; let i = $index) {
-          <div class="ff-card ff-card-post p-3 mb-3 ff-anim" [class]="'ff-d' + (i < 5 ? i + 1 : 5)">
+          <div class="ff-card ff-card-post p-3 mb-3 ff-anim" [id]="'post-' + post.id" [class]="'ff-d' + (i < 5 ? i + 1 : 5)">
             <div class="d-flex align-items-center gap-3 mb-3">
               <div class="ff-post-avatar text-white d-flex align-items-center justify-content-center fw-bold"
                    [routerLink]="['/profile', post.authorId]"
@@ -315,7 +314,6 @@
                   </div>
                 }
 
-                
 
                 <div class="d-flex gap-2 mt-2 align-items-start">
                   <div class="ff-post-avatar text-white d-flex align-items-center justify-content-center shadow-sm"
@@ -338,6 +336,18 @@
                 </div>
               </div>
             }
+          </div>
+        }
+
+        @if (!isLoading && hasMorePosts && posts.length > 0) {
+          <div class="text-center py-3">
+            <button class="btn btn-outline-secondary rounded-pill px-4 fw-bold" (click)="loadMorePosts()" [disabled]="isLoadingMore">
+              @if (isLoadingMore) {
+                <span class="spinner-border spinner-border-sm me-2"></span> Loading...
+              } @else {
+                Load More Posts
+              }
+            </button>
           </div>
         }
       </main>

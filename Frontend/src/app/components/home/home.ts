@@ -6,6 +6,7 @@ import { FormsModule } from '@angular/forms';
 import { CommentsService } from '../../service/comments';
 import { UserService } from '../../service/user';
 import { NotificationService } from '../../service/notification';
+import { ToastService } from '../../service/toast';
 import { RouterLink } from '@angular/router';
 
 @Component({
@@ -25,26 +26,32 @@ export class Home implements OnInit {
   suggestedUsers: any[] = [];
   pendingRequests: any[] = [];
 
-  //counters :
+  // counters
   postsCount: number = 0;
   friendsCount: number = 0;
 
-  // notification:
+  // pagination for the feed - lets us append older posts instead of
+  // replacing the whole list, so posts from other users don't get pushed out
+  currentPage: number = 0;
+  hasMorePosts: boolean = true;
+  isLoadingMore: boolean = false;
+
+  // notifications
   notifications: any[] = [];
   unreadNotificationsCount: number = 0;
   isNotificationOpen: boolean = false;
-  isFriendRequestOpen: boolean = false; // for angular vs bootstrap thing
+  isFriendRequestOpen: boolean = false;
 
-  // Search variables
+  // search bar
   searchQuery: string = '';
   searchResults: any[] = [];
   isSearchDropdownOpen: boolean = false;
 
-  // profile dropdown thingy
+  // profile dropdown
   isProfileMenuOpen: boolean = false;
   currentUserId: number = 0;
 
-  // for profile picture
+  // profile picture
   currentUserPic: string | null = null;
 
   // delete-post confirmation modal
@@ -62,6 +69,7 @@ export class Home implements OnInit {
     private commentsService: CommentsService,
     private userService: UserService,
     private notificationService: NotificationService,
+    private toastService: ToastService,
   ) {
     const storedName = localStorage.getItem('fullName');
     if (storedName) {
@@ -80,18 +88,18 @@ export class Home implements OnInit {
 
   toggleNotifications() {
     this.isNotificationOpen = !this.isNotificationOpen;
-    this.isFriendRequestOpen = false; // Close the other
+    this.isFriendRequestOpen = false; // close the other dropdown
   }
 
   toggleFriendRequests() {
     this.isFriendRequestOpen = !this.isFriendRequestOpen;
-    this.isNotificationOpen = false; // Close the other
+    this.isNotificationOpen = false; // close the other dropdown
   }
 
   loadSuggestedUsers() {
     this.userService.getSuggestedUsers().subscribe({
       next: (res: any[]) => {
-        // Map the backend property 'requestSent' to our frontend property 'isRequestSent'
+        // map backend property 'requestSent' to frontend property 'isRequestSent'
         this.suggestedUsers = res.map(user => {
           user.isRequestSent = user.requestSent || false;
           return user;
@@ -102,7 +110,7 @@ export class Home implements OnInit {
     });
   }
 
-  // profile img
+  // profile picture + stats for the sidebar card
   loadCurrentUserProfile() {
     if (this.currentUserId > 0) {
       this.userService.getUserProfile(this.currentUserId).subscribe({
@@ -143,6 +151,7 @@ export class Home implements OnInit {
   }
 
   toggleLike(post: any) {
+    // optimistic UI update first, then sync with backend
     post.isLiked = !post.isLiked;
     post.likeCount = post.isLiked ? (post.likeCount || 0) + 1 : Math.max(0, (post.likeCount || 1) - 1);
     this.cdr.detectChanges();
@@ -153,11 +162,12 @@ export class Home implements OnInit {
       },
       error: (err: any) => {
         if (err.status === 200 || err.status === 201) {
-          console.log('Backend success but parse error (Ignored)');
+          console.log('Backend success but parse error (ignored)');
           return;
         }
 
-        console.error('Real Error liking post:', err);
+        console.error('Real error liking post:', err);
+        // revert on real failure
         post.isLiked = !post.isLiked;
         post.likeCount = post.isLiked ? (post.likeCount || 0) + 1 : Math.max(0, (post.likeCount || 1) - 1);
         this.cdr.detectChanges();
@@ -188,11 +198,19 @@ export class Home implements OnInit {
     }
   }
 
+  // loads the first page of the feed (page 0) - called on init and refresh
   loadPosts() {
     this.isLoading = true;
+    this.currentPage = 0;
+
     this.postService.getAllPosts(0, 10).subscribe({
       next: (res: any) => {
         this.posts = res.content ? res.content : (Array.isArray(res) ? res : []);
+        // Spring's Page object tells us if this was the last page or not
+        // this.hasMorePosts = res.last === false;
+
+        const totalPages = res.page?.totalPages ?? res.totalPages ?? 1;
+        this.hasMorePosts = totalPages > 1;
         this.isLoading = false;
         this.cdr.detectChanges();
       },
@@ -205,6 +223,35 @@ export class Home implements OnInit {
         if (err.status === 403) {
           this.logout();
         }
+      }
+    });
+  }
+
+  // fetches the next page and appends it to the existing list instead of
+  // replacing it - this is what keeps older posts from other users visible
+  // instead of getting pushed out when someone posts a lot at once
+  loadMorePosts() {
+    if (this.isLoadingMore || !this.hasMorePosts) return;
+
+    this.isLoadingMore = true;
+    const nextPage = this.currentPage + 1;
+
+    this.postService.getAllPosts(nextPage, 10).subscribe({
+      next: (res: any) => {
+        const newPosts = res.content ? res.content : [];
+        this.posts = [...this.posts, ...newPosts];
+        this.currentPage = nextPage;
+        // this.hasMorePosts = res.last === false;
+        // load more feature
+        const totalPages = res.page?.totalPages ?? res.totalPages ?? 1;
+        this.hasMorePosts = nextPage + 1 < totalPages;
+        this.isLoadingMore = false;
+        this.cdr.detectChanges();
+      },
+      error: (err: any) => {
+        console.error('Error loading more posts:', err);
+        this.isLoadingMore = false;
+        this.cdr.detectChanges();
       }
     });
   }
@@ -250,7 +297,7 @@ export class Home implements OnInit {
         post.commentsList = post.commentsList.filter((c: any) => c.id !== comment.id);
         post.commentsCount = Math.max(0, (post.commentsCount || 1) - 1);
         this.commentToDelete = null;
-        this.cdr.detectChanges(); // this is what makes it disappear without a manual refresh
+        this.cdr.detectChanges(); // this makes the comment disappear without a manual refresh
       },
       error: (err: any) => {
         console.error('Error deleting comment', err);
@@ -319,57 +366,52 @@ export class Home implements OnInit {
     }
   }
 
-  // Loads all pending friend requests from the backend.
+  // loads all pending friend requests from the backend
   loadPendingRequests() {
     this.userService.getPendingFriendRequests().subscribe({
       next: (res: any[]) => {
         this.pendingRequests = res;
-        this.cdr.detectChanges(); // Update the UI
+        this.cdr.detectChanges();
       },
       error: (err: any) => console.error('Error fetching pending requests:', err)
     });
   }
 
-  // Accepts a friend request and removes it from the UI instantly.
+  // accepts a friend request and removes it from the UI instantly
   acceptRequest(requestId: number) {
-    // Optimistic UI update: Remove the request from the array immediately
+    // optimistic UI update: remove the request from the array immediately
     this.pendingRequests = this.pendingRequests.filter(req => req.requestId !== requestId);
     this.cdr.detectChanges();
 
-    // Send the actual request to the backend
     this.userService.acceptFriendRequest(requestId).subscribe({
       next: () => console.log('Friend request accepted successfully'),
       error: (err: any) => {
         console.error('Error accepting friend request:', err);
-        // If it fails, reload the list to restore the removed request
+        // reload the list to restore the removed request if it failed
         this.loadPendingRequests();
       }
     });
   }
 
-  // Rejects a friend request and removes it from the UI instantly.
+  // rejects a friend request and removes it from the UI instantly
   rejectRequest(requestId: number) {
-    // Optimistic UI update: Remove the request from the array immediately
     this.pendingRequests = this.pendingRequests.filter(req => req.requestId !== requestId);
     this.cdr.detectChanges();
 
-    // Send the actual request to the backend
     this.userService.rejectFriendRequest(requestId).subscribe({
       next: () => console.log('Friend request rejected successfully'),
       error: (err: any) => {
         console.error('Error rejecting friend request:', err);
-        // If it fails, reload the list to restore the removed request
         this.loadPendingRequests();
       }
     });
   }
 
-  // Loads notifications and calculates the unread count:
+  // loads notifications and calculates the unread count
   loadNotifications() {
     this.notificationService.getNotifications().subscribe({
       next: (res: any[]) => {
         this.notifications = res;
-        // Count how many notifications have isRead === false
         this.unreadNotificationsCount = this.notifications.filter(n => !n.read).length;
         this.cdr.detectChanges();
       },
@@ -377,22 +419,44 @@ export class Home implements OnInit {
     });
   }
 
-  // Marks a notification as read and updates the UI instantly.
+  // marks a notification as read and updates the UI instantly
   markNotificationAsRead(notification: any) {
-    if (notification.read) return; // Already read, do nothing
+    if (notification.read) return; // already read, nothing to do
 
-    // Optimistic UI update
     notification.read = true;
     this.unreadNotificationsCount = Math.max(0, this.unreadNotificationsCount - 1);
     this.cdr.detectChanges();
 
-    // Send update to backend
     this.notificationService.markAsRead(notification.id).subscribe({
       error: (err: any) => console.error('Error marking notification as read:', err)
     });
   }
 
-  // Triggered when user types in the search bar
+  // Called when the user clicks a notification in the dropdown.
+  // If the notification is about a like/comment on a post, we scroll the
+  // feed down to that post and give it a quick highlight so it's easy to spot.
+  // Friend-request notifications don't have a postId, so we just mark them read.
+  openNotification(notif: any) {
+    this.markNotificationAsRead(notif);
+    this.isNotificationOpen = false;
+
+    if (!notif.postId) return;
+
+    // small delay so the dropdown has time to close before we scroll
+    setTimeout(() => {
+      const el = document.getElementById('post-' + notif.postId);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        el.classList.add('ff-highlight');
+        setTimeout(() => el.classList.remove('ff-highlight'), 2000);
+      } else {
+        // the post exists but isn't loaded in the current feed page (pagination)
+        this.toastService.show('This post is not visible in your current feed.', 'error');
+      }
+    }, 100);
+  }
+
+  // triggered when user types in the search bar
   onSearch() {
     if (!this.searchQuery.trim()) {
       this.searchResults = [];
@@ -409,7 +473,7 @@ export class Home implements OnInit {
     });
   }
 
-  // Triggered when the user presses Enter in the search bar
+  // triggered when the user presses Enter in the search bar
   onSearchEnter() {
     if (this.searchQuery.trim()) {
       this.isSearchDropdownOpen = false;
@@ -417,9 +481,9 @@ export class Home implements OnInit {
     }
   }
 
-  // Closes the dropdown (used when clicking outside or losing focus)
+  // closes the dropdown (used when clicking outside or losing focus)
   closeSearch() {
-    // Timeout allows the click event on the link to fire before hiding the dropdown
+    // timeout allows the click event on the link to fire before hiding the dropdown
     setTimeout(() => {
       this.isSearchDropdownOpen = false;
       this.cdr.detectChanges();
